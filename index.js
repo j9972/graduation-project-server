@@ -13,6 +13,17 @@ app.use(compression());
 
 const db = require("./models");
 
+const recommendCoursesRouter = require("./routes/RecommendCourses");
+app.use("/recommendcourse", recommendCoursesRouter);
+const recommendHotelsRouter = require("./routes/RecommendHotels");
+app.use("/recommendhotel", recommendHotelsRouter);
+const recommendPlacesRouter = require("./routes/RecommendPlaces");
+app.use("/recommendplace", recommendPlacesRouter);
+const userRouter = require("./routes/Users");
+app.use("/users", userRouter);
+const scheduleRouter = require("./routes/Schedules");
+app.use("/schedule", scheduleRouter);
+
 db.sequelize
   .sync()
   .then(() => {
