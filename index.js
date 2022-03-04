@@ -23,6 +23,8 @@ const userRouter = require("./routes/Users");
 app.use("/users", userRouter);
 const scheduleRouter = require("./routes/Schedules");
 app.use("/schedule", scheduleRouter);
+const SearchRouter = require("./routes/Search");
+app.use("/search", SearchRouter);
 
 db.sequelize
   .sync()
