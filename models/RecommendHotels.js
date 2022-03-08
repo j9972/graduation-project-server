@@ -32,12 +32,13 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         comment: "호텔 주소",
       },
-      orderOfHotel: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        autoIncrement: true,
-        comment: "호텔 순서",
-      },
+      // orderOfHotel: {
+      //   type: DataTypes.STRING,
+      //   allowNull: false,
+      //   autoIncrement: true,
+      //   comment: "호텔 순서",
+      //   primaryKey: true,
+      // },
     },
     {
       charset: "utf8", // 한국어 설정
