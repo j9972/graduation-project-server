@@ -32,12 +32,13 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         comment: "장소 주소",
       },
-      orderOfPlaces: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        autoIncrement: true,
-        comment: "장소 순서",
-      },
+      // orderOfPlaces: {
+      //   type: DataTypes.STRING,
+      //   allowNull: false,
+      //   autoIncrement: true,
+      //   comment: "장소 순서",
+      //   primaryKey: true,
+      // },
       timegapBetweenTwoPlaces: {
         type: DataTypes.STRING,
         allowNull: false,

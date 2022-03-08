@@ -39,6 +39,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   // 추천 장소 호텔 연결은 이름 사진 설명을 가져오기 위함
+  /*
   RecommendCourses.associate = (models) => {
     RecommendCourses.hasMany(models.RecommendHotels, {
       onDelete: "cascade",
@@ -50,6 +51,6 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: "cascade",
     });
   };
-
+*/
   return RecommendCourses;
 };
