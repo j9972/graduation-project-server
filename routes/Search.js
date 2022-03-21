@@ -101,48 +101,6 @@ router.post("/search", (req, res) => {
     });
 });
 
-router.post("/photo", async (req, res) => {
-  const search = req.body.search;
-  console.log("search:", search);
-
-  axios
-    .get("https://openapi.naver.com/v1/search/image.json", {
-      params: {
-        query: search,
-        display: 1,
-        start: 1,
-        sort: "sim",
-        filter: "small",
-      },
-      headers: {
-        "X-Naver-Client-Id": process.env.NAVER_LOCAL_ID_KEY,
-        "X-Naver-Client-Secret": process.env.NAVER_LOCAL_SECRET_KEY,
-        "Access-Control-Allow-Origin": "*",
-        "Content-Type": "application/json",
-      },
-    })
-    .then((response) => {
-      if (response.status === 200) {
-        const item = response.data.items;
-        /*
-        item.map((x) => {
-          x.title = x.title.replace(/<b>/g, "");
-          x.title = x.title.replace(/<\/b>/g, "");
-          // <b> 없애줌
-          // 참고로 replace 메서드는 첫번재 파라미터가 리터럴일 경우 일치하는 첫번째 부분만 변경하기 때문에 전부 찾을 수 있도록 정규표현식으로 g를 포함
-        });
-        */
-        // 이미지 url 만 보냄
-        res.json(item[0].link);
-      }
-    })
-    .catch((error) => {
-      console.log("error:", error);
-    });
-
-  //res.json('success connect with server');
-});
-
 router.get("/", (req, res) => {
   res.json("hello");
 });
