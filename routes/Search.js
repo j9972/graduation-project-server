@@ -24,7 +24,7 @@ router.post("/search", (req, res) => {
     .get("https://openapi.naver.com/v1/search/local.json", {
       params: {
         query: search,
-        display: 1,
+        display: 20,
         start: 1,
         sort: "random",
       },
@@ -55,7 +55,7 @@ router.post("/search", (req, res) => {
           .get("https://openapi.naver.com/v1/search/image.json", {
             params: {
               query: search,
-              display: 1,
+              display: 20,
               start: 1,
               sort: "sim",
               filter: "small",
