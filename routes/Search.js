@@ -39,17 +39,23 @@ router.post("/search", (req, res) => {
       if (response.status === 200) {
         const items = response.data.items;
 
-        let lng = parseInt(items[0].mapx, 10);
-        let lat = parseInt(items[0].mapy, 10);
-
-        let xy = [lng, lat];
-        let resLocation = proj4("TM128", "WGS84", xy);
-        console.log("경도 위도 : ", resLocation[0], resLocation[1]);
-
         items.map((x) => {
           x.title = x.title.replace(/<b>/g, "");
           x.title = x.title.replace(/<\/b>/g, "");
+          // <b> 없애줌
+          // 참고로 replace 메서드는 첫번재 파라미터가 리터럴일 경우 일치하는 첫번째 부분만 변경하기 때문에 전부 찾을 수 있도록 정규표현식으로 g를 포함
         });
+        // let lng = items.map((mx) => parseInt(mx.mapx, 10));
+        // let lat = items.map((my) => parseInt(my.mapy, 10));
+
+        // let resLocationX = proj4("TM128", "WGS84", lng);
+        // let resLocationY = proj4("TM128", "WGS84", lat);
+
+        // let lng = parseInt(items[0].mapx, 10);
+        // let lat = parseInt(items[0].mapy, 10);
+        //let xy = [lng, lat];
+        // let resLocation = proj4("TM128", "WGS84", xy);
+        // console.log("경도 위도 : ", resLocation);
 
         axios
           .get("https://openapi.naver.com/v1/search/image.json", {
@@ -71,21 +77,22 @@ router.post("/search", (req, res) => {
             if (response.status === 200) {
               const item_img = response.data.items;
               /*
-            item.map((x) => {
-              x.title = x.title.replace(/<b>/g, "");
-              x.title = x.title.replace(/<\/b>/g, "");
-              // <b> 없애줌
-              // 참고로 replace 메서드는 첫번재 파라미터가 리터럴일 경우 일치하는 첫번째 부분만 변경하기 때문에 전부 찾을 수 있도록 정규표현식으로 g를 포함
-            });
-            */
+          item.map((x) => {
+            x.title = x.title.replace(/<b>/g, "");
+            x.title = x.title.replace(/<\/b>/g, "");
+            // <b> 없애줌
+            // 참고로 replace 메서드는 첫번재 파라미터가 리터럴일 경우 일치하는 첫번째 부분만 변경하기 때문에 전부 찾을 수 있도록 정규표현식으로 g를 포함
+          });
+          */
               // 이미지 url 만 보냄
               res.json({
-                title: items[0].title,
-                // 경도
-                lng: resLocation[0],
-                // 위도
-                lat: resLocation[1],
-                item_img: item_img[0].link,
+                title: items.map((t) => t.title),
+                link: items.map((l) => l.link),
+                address: items.map((a) => a.address),
+                roadAddress: items.map((r) => r.roadAddress),
+                lng: items.map((x) => x.mapx),
+                lat: items.map((y) => y.mapy),
+                item_img: item_img.map((i) => i.link),
               });
             }
           })
