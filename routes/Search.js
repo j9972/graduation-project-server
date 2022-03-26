@@ -37,6 +37,7 @@ router.post("/search", (req, res) => {
     })
     .then((response) => {
       if (response.status === 200) {
+        const itemsInfo = [];
         const items = response.data.items;
 
         items.map((x) => {
@@ -45,61 +46,55 @@ router.post("/search", (req, res) => {
           // <b> 없애줌
           // 참고로 replace 메서드는 첫번재 파라미터가 리터럴일 경우 일치하는 첫번째 부분만 변경하기 때문에 전부 찾을 수 있도록 정규표현식으로 g를 포함
         });
-        // let lng = items.map((mx) => parseInt(mx.mapx, 10));
-        // let lat = items.map((my) => parseInt(my.mapy, 10));
+        items.map(async (item) => {
+          await axios
+            .get("https://openapi.naver.com/v1/search/image.json", {
+              params: {
+                query: item.title,
+                display: 1,
+                start: 1,
+                sort: "sim",
+                filter: "small",
+              },
+              headers: {
+                "X-Naver-Client-Id": process.env.NAVER_LOCAL_ID_KEY,
+                "X-Naver-Client-Secret": process.env.NAVER_LOCAL_SECRET_KEY,
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json",
+              },
+            })
+            .then((response) => {
+              if (response.status === 200) {
+                const item_img = response.data.items;
+                let imgUrl = "";
+                if (item_img[0]) {
+                  imgUrl = item_img[0].link;
+                }
 
-        // let resLocationX = proj4("TM128", "WGS84", lng);
-        // let resLocationY = proj4("TM128", "WGS84", lat);
+                let lng = parseInt(item.mapx, 10);
+                let lat = parseInt(item.mapy, 10);
+                let xy = [lng, lat];
+                let resLocation = proj4("TM128", "WGS84", xy);
 
-        // let lng = parseInt(items[0].mapx, 10);
-        // let lat = parseInt(items[0].mapy, 10);
-        //let xy = [lng, lat];
-        // let resLocation = proj4("TM128", "WGS84", xy);
-        // console.log("경도 위도 : ", resLocation);
-
-        axios
-          .get("https://openapi.naver.com/v1/search/image.json", {
-            params: {
-              query: search,
-              display: 20,
-              start: 1,
-              sort: "sim",
-              filter: "small",
-            },
-            headers: {
-              "X-Naver-Client-Id": process.env.NAVER_LOCAL_ID_KEY,
-              "X-Naver-Client-Secret": process.env.NAVER_LOCAL_SECRET_KEY,
-              "Access-Control-Allow-Origin": "*",
-              "Content-Type": "application/json",
-            },
-          })
-          .then((response) => {
-            if (response.status === 200) {
-              const item_img = response.data.items;
-              /*
-          item.map((x) => {
-            x.title = x.title.replace(/<b>/g, "");
-            x.title = x.title.replace(/<\/b>/g, "");
-            // <b> 없애줌
-            // 참고로 replace 메서드는 첫번재 파라미터가 리터럴일 경우 일치하는 첫번째 부분만 변경하기 때문에 전부 찾을 수 있도록 정규표현식으로 g를 포함
-          });
-          */
-              // 이미지 url 만 보냄
-              res.json({
-                title: items.map((t) => t.title),
-                link: items.map((l) => l.link),
-                address: items.map((a) => a.address),
-                roadAddress: items.map((r) => r.roadAddress),
-                lng: items.map((x) => x.mapx),
-                lat: items.map((y) => y.mapy),
-                item_img: item_img.map((i) => i.link),
-              });
-            }
-          })
-          .catch((error) => {
-            res.json({ msg: error });
-            console.log("err:", error);
-          });
+                itemsInfo.push({
+                  title: item.title,
+                  link: item.link,
+                  imgUrl: imgUrl,
+                  address: item.address,
+                  roadAddress: item.roadAddress,
+                  lng: resLocation[0],
+                  lat: resLocation[1],
+                });
+              }
+            })
+            .catch((error) => {
+              res.json({ msg: error });
+              console.log("err:", error);
+            });
+        });
+        setTimeout(() => {
+          res.json(itemsInfo);
+        }, 500);
       }
     })
     .catch((error) => {
