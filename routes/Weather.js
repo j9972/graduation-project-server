@@ -42,7 +42,6 @@ router.post("/", (req, res) => {
 
 router.get("/", (req, res) => {
   res.json("weather");
-  console.log("hi");
 });
 
 module.exports = router;
