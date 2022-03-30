@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 3001;
 const cors = require("cors");
+const morgan = require("morgan");
 
 const helmet = require("helmet");
 const compression = require("compression");
@@ -10,6 +11,7 @@ app.use(express.json());
 app.use(cors());
 app.use(helmet());
 app.use(compression());
+app.use(morgan("combined"));
 
 const db = require("./models");
 
@@ -25,6 +27,8 @@ const scheduleRouter = require("./routes/Schedules");
 app.use("/schedule", scheduleRouter);
 const SearchRouter = require("./routes/Search");
 app.use("/search", SearchRouter);
+const weatherRouter = require("./routes/Weather");
+app.use("/weather", weatherRouter);
 
 db.sequelize
   .sync()
