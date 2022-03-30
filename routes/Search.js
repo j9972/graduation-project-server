@@ -4,18 +4,48 @@ const axios = require("axios");
 const uuidAPIKey = require("uuid-apikey");
 const proj4 = require("proj4");
 
+// REDIS
+const Redis = require("redis");
+const redisClient = Redis.createClient(); // ({url: defualt url})
+const DEFAULT_EXPIRATION = 3600; // 3600s = 1hr
+
+// connect redis server with client ( client is closed 에러 prevent )
+(async () => {
+  redisClient.connect();
+})();
+// redisClient.on("connect", () => {
+//   console.log("connect with redis");
+// });
+
 // console.log(uuidAPIKey.create()); -> 시스템마다 다른 api키를 제공하면 이값들을 디비에서 관리하면 된다 -> isAPIKey method or check method로 확인가능
 
+// express
 router.use(express.urlencoded({ extended: false }));
 router.use(express.json());
+
+// ENV
 require("dotenv").config();
 
+// proj4 module for lat & lng
 proj4.defs("WGS84", "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
 proj4.defs(
   "TM128",
   "+proj=tmerc +lat_0=38 +lon_0=128 +k=0.9999 +x_0=400000 +y_0=600000 +ellps=bessel +units=m +no_defs +towgs84=-115.80,474.99,674.11,1.16,-2.31,-1.63,6.43"
 );
 
+const set = (key, value) => {
+  redisClient.set(key, JSON.stringify(value));
+};
+const get = (req, res, next) => {
+  let key = req.route.path; // /search 이런걸 의미
+  redisClient.get(key, (error, data) => {
+    if (error) res.status(400).send(err);
+    if (data !== null) res.status(200).send(JSON.parse(data));
+    else next();
+  });
+};
+
+// Router
 router.post("/search", (req, res) => {
   const search = req.body.search;
   console.log("search:", search);
@@ -37,20 +67,20 @@ router.post("/search", (req, res) => {
     })
     .then((response) => {
       if (response.status === 200) {
-        const itemsInfo = [];
         const items = response.data.items;
-
+        const itemsInfo = [];
         items.map((x) => {
           x.title = x.title.replace(/<b>/g, "");
           x.title = x.title.replace(/<\/b>/g, "");
           // <b> 없애줌
           // 참고로 replace 메서드는 첫번재 파라미터가 리터럴일 경우 일치하는 첫번째 부분만 변경하기 때문에 전부 찾을 수 있도록 정규표현식으로 g를 포함
         });
+
         items.map(async (item) => {
           await axios
             .get("https://openapi.naver.com/v1/search/image.json", {
               params: {
-                query: item.title,
+                query: item,
                 display: 1,
                 start: 1,
                 sort: "sim",
@@ -66,6 +96,7 @@ router.post("/search", (req, res) => {
             .then((response) => {
               if (response.status === 200) {
                 const item_img = response.data.items;
+
                 let imgUrl = "";
                 if (item_img[0]) {
                   imgUrl = item_img[0].link;
@@ -87,16 +118,22 @@ router.post("/search", (req, res) => {
                 });
               }
             })
+
             .catch((error) => {
               res.json({ msg: error });
               console.log("err:", error);
             });
         });
+
         setTimeout(() => {
           res.json(itemsInfo);
-        }, 500);
+        }, 800);
       }
     })
+    // .then((json) => {
+    //   set(req.route.path, json);
+    //   res.status(200).send(json);
+    // })
     .catch((error) => {
       res.json({ msg: error });
       console.log("err:", error);
@@ -106,5 +143,18 @@ router.post("/search", (req, res) => {
 router.get("/", (req, res) => {
   res.json("hello");
 });
+
+// redis middleware
+const getOrSetCache = (key, cb) => {
+  return new Promise((resolve, reject) => {
+    redisClient.get(key, async (error, data) => {
+      if (error) return reject(error);
+      if (data != null) return resolve(JSON.parse(data));
+      const freshData = await cb();
+      redisClient.SETEX(key, DEFAULT_EXPIRATION, JSON.stringify(freshData));
+      resolve(freshData);
+    });
+  });
+};
 
 module.exports = router;
