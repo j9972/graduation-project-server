@@ -4,10 +4,10 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 
 const { Users } = require("../models");
-
 const { sign } = require("jsonwebtoken");
 const { check, validationResult } = require("express-validator");
 require("dotenv").config();
+
 const nodemailer = require("nodemailer");
 
 //Router -> username을 id로 생각
