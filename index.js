@@ -29,6 +29,8 @@ const SearchRouter = require("./routes/Search");
 app.use("/search", SearchRouter);
 const weatherRouter = require("./routes/Weather");
 app.use("/weather", weatherRouter);
+const CompareDistanceRouter = require("./routes/Distance");
+app.use("/compare-distance", CompareDistanceRouter);
 
 db.sequelize
   .sync()
