@@ -46,39 +46,44 @@ const get = (req, res, next) => {
 };
 
 // Router
-router.post("/search", (req, res) => {
+router.post("/search", async (req, res) => {
   const search = req.body.search;
   console.log("search:", search);
 
-  axios
-    .get("https://openapi.naver.com/v1/search/local.json", {
-      params: {
-        query: search,
-        display: 20,
-        start: 1,
-        sort: "random",
-      },
-      headers: {
-        "X-Naver-Client-Id": process.env.NAVER_LOCAL_ID_KEY,
-        "X-Naver-Client-Secret": process.env.NAVER_LOCAL_SECRET_KEY,
-        "Access-Control-Allow-Origin": "*",
-        "Content-Type": "application/json",
-      },
-    })
-    .then((response) => {
-      if (response.status === 200) {
-        const items = response.data.items;
-        const itemsInfo = [];
-        items.map((x) => {
-          x.title = x.title.replace(/<b>/g, "");
-          x.title = x.title.replace(/<\/b>/g, "");
-          // <b> 없애줌
-          // 참고로 replace 메서드는 첫번재 파라미터가 리터럴일 경우 일치하는 첫번째 부분만 변경하기 때문에 전부 찾을 수 있도록 정규표현식으로 g를 포함
-        });
+  try {
+    const dataResponse = await axios.get(
+      "https://openapi.naver.com/v1/search/local.json",
+      {
+        params: {
+          query: search,
+          display: 20,
+          start: 1,
+          sort: "random",
+        },
+        headers: {
+          "X-Naver-Client-Id": process.env.NAVER_LOCAL_ID_KEY,
+          "X-Naver-Client-Secret": process.env.NAVER_LOCAL_SECRET_KEY,
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
+    if (dataResponse.status === 200) {
+      const items = dataResponse.data.items;
+      const itemsInfo = []; // 여기에 데이터를 담아서 res.json 으로 넘길거에요~
+      items.map((x) => {
+        x.title = x.title.replace(/<b>/g, "");
+        x.title = x.title.replace(/<\/b>/g, "");
+        // <b> 없애줌
+        // 참고로 replace 메서드는 첫번재 파라미터가 리터럴일 경우 일치하는 첫번째 부분만 변경하기 때문에 전부 찾을 수 있도록 정규표현식으로 g를 포함
+      });
+      //Promise.all 안에 Promise<> 배열을 넣으면 동기처리를 함 ( itemsInfo )
+      await Promise.all(
         items.map(async (item) => {
-          await axios
-            .get("https://openapi.naver.com/v1/search/image.json", {
+          const response = await axios.get(
+            "https://openapi.naver.com/v1/search/image.json",
+            {
               params: {
                 query: item,
                 display: 1,
@@ -92,52 +97,39 @@ router.post("/search", (req, res) => {
                 "Access-Control-Allow-Origin": "*",
                 "Content-Type": "application/json",
               },
-            })
-            .then((response) => {
-              if (response.status === 200) {
-                const item_img = response.data.items;
+            }
+          );
 
-                let imgUrl = "";
-                if (item_img[0]) {
-                  imgUrl = item_img[0].link;
-                }
+          if (response.status === 200) {
+            const item_img = response.data.items;
 
-                let lng = parseInt(item.mapx, 10);
-                let lat = parseInt(item.mapy, 10);
-                let xy = [lng, lat];
-                let resLocation = proj4("TM128", "WGS84", xy);
+            let imgUrl = "";
+            if (item_img[0]) {
+              imgUrl = item_img[0].link;
+            }
 
-                itemsInfo.push({
-                  title: item.title,
-                  link: item.link,
-                  imgUrl: imgUrl,
-                  address: item.address,
-                  roadAddress: item.roadAddress,
-                  lng: resLocation[0],
-                  lat: resLocation[1],
-                });
-              }
-            })
+            let lng = parseInt(item.mapx, 10);
+            let lat = parseInt(item.mapy, 10);
+            let xy = [lng, lat];
+            let resLocation = proj4("TM128", "WGS84", xy);
 
-            .catch((error) => {
-              res.json({ msg: error });
-              console.log("err:", error);
+            itemsInfo.push({
+              title: item.title,
+              link: item.link,
+              imgUrl,
+              address: item.address,
+              roadAddress: item.roadAddress,
+              lng: resLocation[0],
+              lat: resLocation[1],
             });
-        });
-
-        setTimeout(() => {
-          res.json(itemsInfo);
-        }, 800);
-      }
-    })
-    // .then((json) => {
-    //   set(req.route.path, json);
-    //   res.status(200).send(json);
-    // })
-    .catch((error) => {
-      res.json({ msg: error });
-      console.log("err:", error);
-    });
+          }
+        })
+      );
+      res.json(itemsInfo);
+    }
+  } catch (e) {
+    console.error(e);
+  }
 });
 
 router.get("/", (req, res) => {
