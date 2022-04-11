@@ -21,7 +21,7 @@ app.use("/recommend-course", recommendCoursesRouter);
 
 // 숙박 추천
 const recommendHotelsRouter = require("./routes/RecommendHotels");
-app.use("/recommend-hotel", recommendHotelsRouter);
+app.use("/recommend-stay", recommendHotelsRouter);
 
 // 행사 레포츠 문화 추천
 const recommendPlacesRouter = require("./routes/RecommendPlaces");
