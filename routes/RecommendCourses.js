@@ -3,8 +3,6 @@ const router = express.Router();
 const axios = require("axios");
 
 const { RecommendCourses } = require("../models");
-const { sign } = require("jsonwebtoken");
-//const { json } = require("sequelize/types");
 
 // express
 router.use(express.urlencoded({ extended: false }));
