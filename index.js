@@ -36,16 +36,20 @@ const scheduleRouter = require("./routes/Schedules");
 app.use("/schedule", scheduleRouter);
 
 // 검색 api
-const SearchRouter = require("./routes/Search");
-app.use("/search", SearchRouter);
+const searchRouter = require("./routes/Search");
+app.use("/search", searchRouter);
 
 // 날씨 api
 const weatherRouter = require("./routes/Weather");
 app.use("/weather", weatherRouter);
 
 // 마커간 거리비교 api
-const CompareDistanceRouter = require("./routes/Distance");
-app.use("/compare-distance", CompareDistanceRouter);
+const compareDistanceRouter = require("./routes/Distance");
+app.use("/compare-distance", compareDistanceRouter);
+
+// 방문자 수 확인
+const visitRouter = require("./routes/Visitor");
+app.use("/visitor", visitRouter);
 
 db.sequelize
   .sync()

@@ -10,11 +10,11 @@ router.use(express.json());
 require("dotenv").config();
 
 // Router -> 지역 선택하는 과정에서 넘어오는 title을 가지고 검색
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
   const data = req.body;
   console.log("title:", data.title);
-  axios
-    .get(
+  try {
+    const response = await axios.get(
       "https://api.openweathermap.org/data/2.5/weather",
       {
         params: {
@@ -28,16 +28,14 @@ router.post("/", (req, res) => {
           "Content-Type": "application/json",
         },
       }
-    )
-    .then((response) => {
-      if (response.status === 200) {
-        res.json(response.data);
-      }
-    })
-    .catch((error) => {
-      res.json({ msg: error });
-      console.log("err:", error);
-    });
+    );
+    if (response.status === 200) {
+      res.json(response.data);
+    }
+  } catch (e) {
+    console.error(e);
+    res.json({ msg: e });
+  }
 });
 
 router.get("/", (req, res) => {
