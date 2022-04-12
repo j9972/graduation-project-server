@@ -17,9 +17,12 @@ router.get("/", async (req, res) => {
   try {
     const response = await axios.get("https://api.ipify.org?format=json");
 
+    console.log("response:", response);
+
     const ip = response.data.ip;
 
     const Ip = await Visitor.findOne({ where: { ip } });
+    // const TotalCount = await Visitor.findOne({ where: { totalCount } });
 
     let currentTime = new Date();
     const dateTime =
@@ -29,9 +32,7 @@ router.get("/", async (req, res) => {
       "/" +
       currentTime.getDate();
 
-    console.log(dateTime);
-    // const TotalCount = Visitor.totalCount;
-    // const TodayCount = Visitor.todayCount;
+    console.log("dateTime:", dateTime, "ip", ip);
 
     if (!Ip) {
       Visitor.create({
@@ -42,36 +43,48 @@ router.get("/", async (req, res) => {
       });
     }
 
-    // if (Ip) {
-    //   Visitor.update({
-    //     totalCount: TotalCount + 1,
-    //   });
-    //   console.log("check1");
-    //   if (Visitor.date === dateTime) {
-    //     Visitor.update({
-    //       todayCount: TodayCount + 1,
-    //     });
-    //     console.log("check2");
-    //   } else {
-    //     Visitor.update({
-    //       todayCount: 1,
-    //       date: dateTime,
-    //     });
-    //     console.log("check3");
-    //     return res.status(200).json({
-    //       checkMsg: [
-    //         {
-    //           msg: "It Doesnt Over Midnight So We Cant Count This Time",
-    //         },
-    //       ],
-    //     });
-    //   }
-    // }
+    if (Ip) {
+      console.log("check1");
+      if (Ip.ip === ip) {
+        if (Ip.date === dateTime) {
+          console.log("check2");
+          return res.status(200).json({
+            checkMsg: [
+              {
+                msg: "It Doesnt Over Midnight So We Cant Count This Time",
+              },
+            ],
+          });
+        } else {
+          console.log("check3");
+          Visitor.update(
+            {
+              totalCount: Ip.totalCount + 1,
+              todayCount: 1,
+              date: dateTime,
+            },
+            {
+              where: {
+                ip,
+              },
+            }
+          );
+        }
+      } else {
+        console.log("check4");
+        Visitor.create({
+          ip,
+          totalCount: Ip.totalCount + 1,
+          todayCount: 1,
+          date: dateTime,
+        });
+      }
+    }
 
     res.json({
       msg: "success",
-      //   TotalCount,
-      //   TodayCount,
+      //Total,
+      //todayCount,
       dateTime,
     });
   } catch (error) {
