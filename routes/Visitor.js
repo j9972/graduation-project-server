@@ -2,10 +2,6 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 
-// express
-router.use(express.urlencoded({ extended: false }));
-router.use(express.json());
-
 // DB 불러옴
 const { Visitor } = require("../models");
 

@@ -4,10 +4,6 @@ const axios = require("axios");
 
 const { RecommendCourses } = require("../models");
 
-// express
-router.use(express.urlencoded({ extended: false }));
-router.use(express.json());
-
 // ENV
 require("dotenv").config();
 

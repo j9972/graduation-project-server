@@ -1,13 +1,9 @@
+// ENV
+require("dotenv").config();
+
 const express = require("express");
 const router = express.Router();
 const axios = require("axios");
-
-// express
-router.use(express.urlencoded({ extended: false }));
-router.use(express.json());
-
-// ENV
-require("dotenv").config();
 
 // Router -> 출발지와 도착지 ( 마커 하나하나 거리 )를 차로 이동거리와 이동시간 표시
 router.post("/", (req, res) => {

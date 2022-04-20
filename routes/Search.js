@@ -10,18 +10,9 @@ const redisClient = Redis.createClient(); // ({url: defualt url})
 const DEFAULT_EXPIRATION = 3600; // 3600s = 1hr
 
 // connect redis server with client ( client is closed 에러 prevent )
-(async () => {
-  redisClient.connect();
-})();
-// redisClient.on("connect", () => {
-//   console.log("connect with redis");
-// });
+redisClient.connect();
 
 // console.log(uuidAPIKey.create()); -> 시스템마다 다른 api키를 제공하면 이값들을 디비에서 관리하면 된다 -> isAPIKey method or check method로 확인가능
-
-// express
-router.use(express.urlencoded({ extended: false }));
-router.use(express.json());
 
 // ENV
 require("dotenv").config();
@@ -33,15 +24,16 @@ proj4.defs(
   "+proj=tmerc +lat_0=38 +lon_0=128 +k=0.9999 +x_0=400000 +y_0=600000 +ellps=bessel +units=m +no_defs +towgs84=-115.80,474.99,674.11,1.16,-2.31,-1.63,6.43"
 );
 
-const set = (key, value) => {
-  redisClient.set(key, JSON.stringify(value));
-};
-const get = (req, res, next) => {
-  let key = req.route.path; // /search 이런걸 의미
-  redisClient.get(key, (error, data) => {
-    if (error) res.status(400).send(err);
-    if (data !== null) res.status(200).send(JSON.parse(data));
-    else next();
+// Redis middleware
+const getOrSetCache = (key, cb) => {
+  return new Promise((resolve, reject) => {
+    redisClient.get(key, async (error, data) => {
+      if (error) return reject(error);
+      if (data != null) return resolve(JSON.parse(data));
+      const freshData = await cb();
+      redisClient.SETEX(key, DEFAULT_EXPIRATION, JSON.stringify(freshData));
+      resolve(freshData);
+    });
   });
 };
 
@@ -135,18 +127,5 @@ router.post("/search", async (req, res) => {
 router.get("/", (req, res) => {
   res.json("hello");
 });
-
-// redis middleware
-const getOrSetCache = (key, cb) => {
-  return new Promise((resolve, reject) => {
-    redisClient.get(key, async (error, data) => {
-      if (error) return reject(error);
-      if (data != null) return resolve(JSON.parse(data));
-      const freshData = await cb();
-      redisClient.SETEX(key, DEFAULT_EXPIRATION, JSON.stringify(freshData));
-      resolve(freshData);
-    });
-  });
-};
 
 module.exports = router;
