@@ -28,6 +28,10 @@ app.use("/recommend-stay", recommendHotelsRouter);
 const recommendPlacesRouter = require("./routes/RecommendPlaces");
 app.use("/recommend-place", recommendPlacesRouter);
 
+// 레포츠 추천
+const recommendSportRouter = require("./routes/RecommendSports");
+app.use("/recommend-sport", recommendSportRouter);
+
 // 유저
 const userRouter = require("./routes/Users");
 app.use("/users", userRouter);

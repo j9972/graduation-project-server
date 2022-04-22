@@ -10,7 +10,7 @@ const redisClient = Redis.createClient(); // ({url: defualt url})
 const DEFAULT_EXPIRATION = 3600; // 3600s = 1hr
 
 // connect redis server with client ( client is closed 에러 prevent )
-redisClient.connect();
+//redisClient.connect();
 
 // console.log(uuidAPIKey.create()); -> 시스템마다 다른 api키를 제공하면 이값들을 디비에서 관리하면 된다 -> isAPIKey method or check method로 확인가능
 

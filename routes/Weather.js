@@ -10,7 +10,7 @@ const redisClient = Redis.createClient(); // ({url: defualt url})
 const DEFAULT_EXPIRATION = 3600; // 3600s = 1hr
 
 // connect redis server with client ( client is closed 에러 prevent )
-redisClient.connect();
+//redisClient.connect();
 
 //Redis middleware
 

@@ -25,6 +25,7 @@ router.post("/search-keyword", async (req, res) => {
           _type: "json",
           keyword: keyword,
           contentTypeId: 15,
+          numOfRows: 100,
         },
       },
       {
@@ -78,10 +79,12 @@ router.post("/detailIntro", async (req, res) => {
   }
 });
 
-// 행사 정보 조회, 소개 정보 조회에서 이벤트 시작날짜 알아오기
+// 행사 정보 조회, 소개 정보 조회에서 이벤트 시작날짜 알아오기 ( 이거 할 필요 없음 )
 router.post("/search-Festival", async (req, res) => {
   const eventStartDate = req.body.eventStartDate;
-  console.log(eventStartDate);
+  const contentId = req.body.contentId;
+  console.log("contentId: ", contentId);
+  console.log("eventStartDate:", eventStartDate);
   try {
     const response = await axios.get(
       "http://api.visitkorea.or.kr/openapi/service/rest/KorService/searchFestival",
@@ -92,6 +95,7 @@ router.post("/search-Festival", async (req, res) => {
           MobileApp: "GoTrip",
           _type: "json",
           eventStartDate: eventStartDate,
+          contentid: contentId,
           listYN: "Y",
         },
       },
