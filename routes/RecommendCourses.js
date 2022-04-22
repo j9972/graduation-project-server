@@ -35,8 +35,8 @@ router.post("/search-keyword", async (req, res) => {
       }
     );
     if (response.status === 200) {
-      const items = response.data;
-      res.json(items);
+      const courseInfo = response.data.response.body.items.item;
+      res.json(courseInfo);
     }
   } catch (e) {
     console.error(e);
