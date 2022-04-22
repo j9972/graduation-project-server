@@ -70,8 +70,8 @@ router.post("/detailIntro", async (req, res) => {
       }
     );
     if (response.status === 200) {
-      const items = response.data;
-      res.json(items);
+      const placeInfo = response.data.response.body.items.item;
+      res.json(placeInfo);
     }
   } catch (e) {
     console.error(e);

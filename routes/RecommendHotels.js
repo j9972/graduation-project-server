@@ -65,8 +65,8 @@ router.post("/detailIntro", async (req, res) => {
       }
     );
     if (response.status === 200) {
-      const items = response.data;
-      res.json(items);
+      const stayInfo = response.data.response.body.items.item;
+      res.json(stayInfo);
     }
   } catch (e) {
     console.error(e);
