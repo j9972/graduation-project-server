@@ -64,6 +64,7 @@ router.post("/search", async (req, res) => {
     if (dataResponse.status === 200) {
       const items = dataResponse.data.items;
       const itemsInfo = []; // 여기에 데이터를 담아서 res.json 으로 넘길거에요~
+
       items.map((x) => {
         x.title = x.title.replace(/<b>/g, "");
         x.title = x.title.replace(/<\/b>/g, "");
@@ -77,7 +78,7 @@ router.post("/search", async (req, res) => {
             "https://openapi.naver.com/v1/search/image.json",
             {
               params: {
-                query: item,
+                query: item.title,
                 display: 1,
                 start: 1,
                 sort: "sim",
@@ -91,7 +92,6 @@ router.post("/search", async (req, res) => {
               },
             }
           );
-
           if (response.status === 200) {
             const item_img = response.data.items;
 
