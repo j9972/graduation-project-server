@@ -2,8 +2,6 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 
-const { RecommendHotels } = require("../models");
-
 // 키워드 검색 조회로 할 수 있음
 router.post("/search-keyword", async (req, res) => {
   const keyword = req.body.keyword;
