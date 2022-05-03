@@ -108,48 +108,49 @@ router.post("/login", async (req, res) => {
   // manager가 있다면 accesToken이 있나?
   if (!user) {
     res.json({ error: "User doesnt exist" });
-  }
-
-  bcrypt.compare(password, user.password).then((match) => {
-    if (!match) {
-      res.json({ error: "wrong username and password combination" });
-    }
-    const accessToken = sign(
-      { username: user.username, id: user.id },
-      process.env.ACCESS_TOKEN_SECRET,
-      {
-        expiresIn: "10m",
+    console.log("아이디가 없습니다 재로그인 부탁드려요");
+  } else {
+    bcrypt.compare(password, user.password).then((match) => {
+      if (!match) {
+        res.json({ error: "wrong username and password combination" });
       }
-    );
+      const accessToken = sign(
+        { username: user.username, id: user.id },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+          expiresIn: "10m",
+        }
+      );
 
-    const refreshToken = sign(
-      { username: user.username, id: user.id },
-      process.env.REFRESH_TOKEN_SECRET,
-      {
-        expiresIn: "24d",
-      }
-    );
+      const refreshToken = sign(
+        { username: user.username, id: user.id },
+        process.env.REFRESH_TOKEN_SECRET,
+        {
+          expiresIn: "24d",
+        }
+      );
 
-    Users.update(
-      {
-        refreshTokens: refreshToken,
-      },
-      {
-        where: {
-          username,
+      Users.update(
+        {
+          refreshTokens: refreshToken,
         },
-      }
-    );
+        {
+          where: {
+            username,
+          },
+        }
+      );
 
-    res.json({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-      username,
-      id: user.id,
-      email: user.email,
-      msg: "success login",
+      res.json({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+        username,
+        id: user.id,
+        email: user.email,
+        msg: "success login",
+      });
     });
-  });
+  }
 });
 
 // Create new access token from refresh token

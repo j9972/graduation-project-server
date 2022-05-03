@@ -27,15 +27,14 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
-  MyPageDB.associate = (models) => {
-    MyPageDB.hasMany(models.Users, {
-      onDelete: "cascade",
-    });
-  };
+  // MyPageDB.associate = (models) => {
+  //   MyPageDB.hasMany(models.Users, {
+  //     onDelete: "cascade",
+  //   });
+  // };
 
   return MyPageDB;
 };
 
-
-스케쥴 db는 마이페이지에 있는 사진, 일정제목을 보여주는 디비
-일정 생성에 대한 데이터 베이스는 사진, 장소 이름만 보여주면 됨
+// 스케쥴 db는 마이페이지에 있는 사진, 일정제목을 보여주는 디비
+// 일정 생성에 대한 데이터 베이스는 사진, 장소 이름만 보여주면 됨
