@@ -60,6 +60,27 @@ router.post("/", [check("email").isEmail()], async (req, res) => {
   });
 });
 
+router.post("/nameCheck", async (req, res) => {
+  const username = req.body.username;
+
+  // validate if username already exists
+  const user = await Users.findOne({ where: { username } });
+
+  if (user) {
+    return res.status(200).json({
+      errors: [
+        {
+          msg: "A UserName Already Exists ",
+        },
+      ],
+    });
+  }
+
+  res.json({
+    msg: "success",
+  });
+});
+
 router.post("/email-auth", async (req, res) => {
   const { email } = req.body;
 

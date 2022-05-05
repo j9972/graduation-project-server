@@ -79,8 +79,6 @@ router.get("/", async (req, res) => {
 
     res.json({
       msg: "success",
-      //Total,
-      //todayCount,
       dateTime,
     });
   } catch (error) {
