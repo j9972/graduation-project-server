@@ -5,13 +5,21 @@ const router = express.Router();
 const axios = require("axios");
 
 // REDIS
-// REDIS
 const Redis = require("redis");
 const redisClient = Redis.createClient(); // ({url: defualt url})
 const DEFAULT_EXPIRATION = 3600; // 3600s = 1hr
 
 redisClient.connect();
 
+redisClient.on("connect", () => {
+  console.log("connect");
+});
+
+redisClient.on("error", (err) => {
+  console.error(err);
+});
+
+/*
 const cache = (req, res, next) => {
   const key = req.body;
   redisClient.get(key, (err, data) => {
@@ -25,17 +33,71 @@ const cache = (req, res, next) => {
     }
   });
 };
+*/
 
 // Router -> 지역 선택하는 과정에서 넘어오는 title을 가지고 검색
-router.post("/", cache, async (req, res) => {
-  const data = req.body;
-  console.log("title:", data.title);
+router.post("/", (req, res) => {
+  const key = req.body.title;
+  console.log("key: ", key);
   try {
+    console.log("redis before");
+    redisClient.get(key, async (err, dataRes) => {
+      console.log("redis start");
+      if (err) {
+        console.log("redis err");
+        throw err;
+      }
+
+      if (dataRes) {
+        console.log("dataRes");
+        res.status(200).send({
+          dataRes: JSON.parse(dataRes),
+          msg: "cache hit",
+        });
+      } else {
+        console.log("else");
+        const dataRes = await axios.get(
+          "https://api.openweathermap.org/data/2.5/weather",
+          {
+            params: {
+              q: key,
+              appid: process.env.OPEN_WEATHER_KEY,
+            },
+          },
+          {
+            headers: {
+              "Access-Control-Allow-Origin": "*",
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        redisClient.SETEX(
+          key,
+          DEFAULT_EXPIRATION,
+          JSON.stringify(dataRes.data)
+        );
+        res.status(200).send({
+          dataRes: dataRes.data,
+          msg: "cache miss",
+        });
+      }
+    });
+  } catch (err) {
+    res.status(500).send({ msg: err.message });
+  }
+});
+
+/*
+router.post("/", async (req, res) => {
+  try {
+    const data = req.body.title;
+    console.log("title:", data);
+
     const response = await axios.get(
       "https://api.openweathermap.org/data/2.5/weather",
       {
         params: {
-          q: data.title,
+          q: data,
           appid: process.env.OPEN_WEATHER_KEY,
         },
       },
@@ -47,12 +109,6 @@ router.post("/", cache, async (req, res) => {
       }
     );
     if (response.status === 200) {
-      const { representData } = await response.json();
-      console.log("representData: ", representData);
-
-      //cache data to redis
-      redisClient.SETEX(data, representData);
-
       const items = response.data;
       res.json(items);
     }
@@ -61,6 +117,7 @@ router.post("/", cache, async (req, res) => {
     res.json({ msg: e });
   }
 });
+*/
 
 router.get("/", (req, res) => {
   res.json("weather");

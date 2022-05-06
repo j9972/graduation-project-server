@@ -60,6 +60,50 @@ router.post("/", [check("email").isEmail()], async (req, res) => {
   });
 });
 
+router.post("/findId", async (req, res) => {
+  const email = req.body.email;
+  console.log("email:", email);
+
+  // validate if username already exists
+  const user = await Users.findOne({ where: { email } });
+
+  if (!user) {
+    return res.status(200).json({
+      errors: [
+        {
+          msg: "User doesnt exist",
+        },
+      ],
+    });
+  }
+
+  res.json({
+    username: user.username,
+    msg: "success",
+  });
+});
+
+router.post("/emailCheck", async (req, res) => {
+  const email = req.body.email;
+
+  // validate if username already exists
+  const user = await Users.findOne({ where: { email } });
+
+  if (user) {
+    return res.status(200).json({
+      errors: [
+        {
+          msg: "A Email Already Exists ",
+        },
+      ],
+    });
+  }
+
+  res.json({
+    msg: "success",
+  });
+});
+
 router.post("/nameCheck", async (req, res) => {
   const username = req.body.username;
 
