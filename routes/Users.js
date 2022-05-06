@@ -26,13 +26,24 @@ router.post("/", [check("email").isEmail()], async (req, res) => {
 
   // validate if user already exists
   const user = await Users.findOne({ where: { username } });
+  const userEmail = await Users.findOne({ where: { email } });
 
   if (user) {
     return res.status(200).json({
       errors: [
         {
-          email: user.email,
-          msg: "The User Account Already Exists ",
+          email: user.username,
+          msg: "The Username Already Exists ",
+        },
+      ],
+    });
+  }
+
+  if (userEmail) {
+    return res.status(200).json({
+      errors: [
+        {
+          msg: "The User Email Already Exists ",
         },
       ],
     });
@@ -79,27 +90,6 @@ router.post("/findId", async (req, res) => {
 
   res.json({
     username: user.username,
-    msg: "success",
-  });
-});
-
-router.post("/emailCheck", async (req, res) => {
-  const email = req.body.email;
-
-  // validate if username already exists
-  const user = await Users.findOne({ where: { email } });
-
-  if (user) {
-    return res.status(200).json({
-      errors: [
-        {
-          msg: "A Email Already Exists ",
-        },
-      ],
-    });
-  }
-
-  res.json({
     msg: "success",
   });
 });
