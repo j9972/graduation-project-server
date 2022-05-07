@@ -202,7 +202,10 @@ router.post("/login", async (req, res) => {
   } else {
     bcrypt.compare(password, user.password).then((match) => {
       if (!match) {
-        res.json({ error: "wrong username and password combination" });
+        return res
+          .status(200)
+          .send({ error: "wrong username and password combination" });
+        //res.json({ error: "wrong username and password combination" });
       }
       const accessToken = sign(
         { username: user.username, id: user.id },
