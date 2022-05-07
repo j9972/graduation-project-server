@@ -96,12 +96,9 @@ router.post("/findId", async (req, res) => {
 
 router.post("/findPassword", async (req, res) => {
   const { username, email } = req.body;
-  console.log("email:", email, "username:", username);
 
   // validate if username already exists
   const user = await Users.findOne({ where: { username } });
-
-  console.log("user:  ", user);
 
   // 유저 아이디로 찾는데 유저 아이디가 틀린경우
   if (user == null) {
@@ -125,6 +122,7 @@ router.post("/findPassword", async (req, res) => {
     });
   }
 
+  // 전부 맞는경우
   if (user.username == username && user.email == email) {
     res.json({ msg: "success" });
   }
@@ -318,7 +316,24 @@ router.post("/token", async (req, res) => {
   }
 });
 
-router.get("/user-id/:id", async (req, res) => {
+router.put("/change-password", async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  const user = await Users.findOne({ where: { username } });
+
+  bcrypt.compare(oldPassword, user.password).then(async (match) => {
+    if (!match) {
+      res.json({ error: "wrong password entered" });
+    }
+
+    bcrypt.hash(newPassword, 10).then((hash) => {
+      Users.update({ password: hash }, { where: { username } });
+      res.json("success");
+    });
+  });
+});
+
+router.get("/:id", async (req, res) => {
   const id = req.params.id;
   console.log(id);
   const user = await Users.findByPk(id, {
