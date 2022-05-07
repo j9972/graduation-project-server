@@ -317,21 +317,28 @@ router.post("/token", async (req, res) => {
   }
 });
 
-router.put("/change-password", async (req, res) => {
-  const { oldPassword, newPassword } = req.body;
+router.put("/change-password", async (req, res) => {
+  const { email, newPassword } = req.body;
 
-  const user = await Users.findOne({ where: { username } });
+  const user = await Users.findOne({ where: { email } });
 
-  bcrypt.compare(oldPassword, user.password).then(async (match) => {
-    if (!match) {
-      res.json({ error: "wrong password entered" });
-    }
+  // 유저 이메일로 찾는데 유저 이메일이 틀린경우
+  if (user == null) {
+    return res.status(200).json({
+      errors: [
+        {
+          msg: "A Email Is Wrong ",
+        },
+      ],
+    });
+  }
 
+  if (user.email == email) {
     bcrypt.hash(newPassword, 10).then((hash) => {
-      Users.update({ password: hash }, { where: { username } });
+      Users.update({ password: hash }, { where: { email } });
       res.json("success");
     });
-  });
+  }
 });
 
 router.get("/mypage-trip-history", async (req, res) => {});
