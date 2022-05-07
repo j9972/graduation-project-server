@@ -47,8 +47,6 @@ module.exports = (sequelize, DataTypes) => {
 
   Users.associate = (models) => {
     Users.hasMany(models.Schedule, {
-      foreignKey: "user_id",
-      sourceKey: "id",
       onDelete: "cascade",
     });
   };

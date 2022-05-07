@@ -10,6 +10,7 @@ const { check, validationResult } = require("express-validator");
 require("dotenv").config();
 
 const nodemailer = require("nodemailer");
+const MyPageDBs = require("../models/MyPageDBs");
 
 //Router -> username을 id로 생각
 router.post("/", [check("email").isEmail()], async (req, res) => {
@@ -344,7 +345,19 @@ router.put("/change-password", async (req, res) => {
   }
 });
 
-router.get("/mypage-trip-history", async (req, res) => {});
+// mypage랑 schedule 연결함
+router.get("/mypage-trip-history", async (req, res) => {
+  const mp = await MyPageDBs.findAll();
+  let mpList = [];
+
+  mpList.push({
+    title: mp.titleOfTrip,
+    photo: mp.MyPagePhoto,
+    atThtTime: mp.createdAt,
+  });
+
+  res.json(mpList);
+});
 
 router.post("/trip-schedule", async (req, res) => {
   // 마이페이지랑, 일정생성시 front -> server로 id값을 넘겨주기
@@ -353,9 +366,11 @@ router.post("/trip-schedule", async (req, res) => {
   let scheduleList = [];
 
   const user = await Users.findOne({ where: { username } });
-  const user_id = user.id;
+  const userId = user.id;
 
-  const scheduleTableUser = await Schedule.findAll({ where: user_id });
+  const scheduleTableUser = await Schedule.findAll({
+    where: { userId: userId },
+  });
 
   if (scheduleTableUser.id == scheduleID) {
     scheduleList.push({
