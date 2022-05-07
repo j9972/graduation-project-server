@@ -94,6 +94,42 @@ router.post("/findId", async (req, res) => {
   });
 });
 
+router.post("/findPassword", async (req, res) => {
+  const { username, email } = req.body;
+  console.log("email:", email, "username:", username);
+
+  // validate if username already exists
+  const user = await Users.findOne({ where: { username } });
+
+  console.log("user:  ", user);
+
+  // 유저 아이디로 찾는데 유저 아이디가 틀린경우
+  if (user == null) {
+    return res.status(200).json({
+      errors: [
+        {
+          msg: "A UserName Is Wrong ",
+        },
+      ],
+    });
+  }
+
+  // 이메일이 틀린경우
+  if (user.email !== email) {
+    return res.status(200).json({
+      errors: [
+        {
+          msg: "A Email Is Wrong ",
+        },
+      ],
+    });
+  }
+
+  if (user.username == username && user.email == email) {
+    res.json({ msg: "success" });
+  }
+});
+
 router.post("/nameCheck", async (req, res) => {
   const username = req.body.username;
 
