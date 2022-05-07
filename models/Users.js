@@ -40,7 +40,15 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   Users.associate = (models) => {
-    Users.hasMany(models.MyPageDB, {
+    Users.hasMany(models.MyPageDBs, {
+      onDelete: "cascade",
+    });
+  };
+
+  Users.associate = (models) => {
+    Users.hasMany(models.Schedule, {
+      foreignKey: "user_id",
+      sourceKey: "id",
       onDelete: "cascade",
     });
   };

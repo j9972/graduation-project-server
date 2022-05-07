@@ -4,6 +4,7 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 
 const { Users } = require("../models");
+const { Schedule } = require("../models");
 const { sign } = require("jsonwebtoken");
 const { check, validationResult } = require("express-validator");
 require("dotenv").config();
@@ -116,7 +117,7 @@ router.post("/findPassword", async (req, res) => {
     return res.status(200).json({
       errors: [
         {
-          msg: "A Email Is Wrong ",
+          msg: "A Email Is Wrong",
         },
       ],
     });
@@ -331,6 +332,30 @@ router.put("/change-password", async (req, res) => {
       res.json("success");
     });
   });
+});
+
+router.get("/mypage-trip-history", async (req, res) => {});
+
+router.post("/trip-schedule", async (req, res) => {
+  // 마이페이지랑, 일정생성시 front -> server로 id값을 넘겨주기
+  // username으로 user_id얻고, user_id로 관련 데이터 스케쥴 테이블에서 다 찾고 스케줄 id 비교로 데이터 뽑기
+  const { username, scheduleID } = req.body;
+  let scheduleList = [];
+
+  const user = await Users.findOne({ where: { username } });
+  const user_id = user.id;
+
+  const scheduleTableUser = await Schedule.findAll({ where: user_id });
+
+  if (scheduleTableUser.id == scheduleID) {
+    scheduleList.push({
+      title: user.title,
+      scheduleDay: user.scheduleDay,
+      order: user.order,
+      photo: user.placePhoto,
+    });
+    res.json({ list: scheduleList });
+  }
 });
 
 router.get("/:id", async (req, res) => {

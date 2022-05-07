@@ -2,19 +2,23 @@ module.exports = (sequelize, DataTypes) => {
   const Schedule = sequelize.define(
     "Schedule",
     {
-      id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        primaryKey: true,
-        comment: "고유번호 UUID",
+      scheduleDay: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        comment: "몇번째 여행 날짜",
+      },
+      order: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        comment: "여행 순서",
       },
       title: {
         type: DataTypes.STRING,
         allowNull: false,
         comment: "장소 제목",
       },
-      MyPagePhoto: {
-        type: DataTypes.BLOB,
+      placePhoto: {
+        type: DataTypes.BLOB("long"),
         allowNull: false,
         comment: "장소 사진",
       },
@@ -27,11 +31,11 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
-  Schedule.associate = (models) => {
-    Schedule.hasMany(models.Users, {
-      onDelete: "cascade",
-    });
-  };
+  // Schedule.associate = (models) => {
+  //   Schedule.hasMany(models.Users, {
+  //     onDelete: "cascade",
+  //   });
+  // };
 
   return Schedule;
 };
