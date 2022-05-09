@@ -2,6 +2,21 @@ module.exports = (sequelize, DataTypes) => {
   const Schedule = sequelize.define(
     "Schedule",
     {
+      area: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        comment: "여행 지역",
+      },
+      tripTitle: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        comment: "여행 제목",
+      },
+      description: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        comment: "여행 설명",
+      },
       startDay: {
         type: DataTypes.DATE,
         allowNull: false,
@@ -12,22 +27,22 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         comment: "여행 끝 날짜",
       },
-      scheduleDay: {
+      days: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        comment: "몇번째 여행 날짜",
+        comment: "여행 순서 - 날짜별",
       },
       order: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        comment: "여행 순서",
+        comment: "여행 순서 - 같은 날짜 장소별",
       },
-      title: {
+      placeTitle: {
         type: DataTypes.STRING,
         allowNull: false,
-        comment: "장소 제목",
+        comment: "장소 이름",
       },
-      placePhoto: {
+      placeImage: {
         type: DataTypes.BLOB("long"),
         allowNull: false,
         comment: "장소 사진",
@@ -40,12 +55,6 @@ module.exports = (sequelize, DataTypes) => {
       paranoid: true, // timestamps 가 활성화 되어야 사용 가능 > deleteAt 옵션 on
     }
   );
-
-  // Schedule.associate = (models) => {
-  //   Schedule.hasMany(models.Users, {
-  //     onDelete: "cascade",
-  //   });
-  // };
 
   return Schedule;
 };
