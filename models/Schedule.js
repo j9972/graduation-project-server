@@ -2,6 +2,16 @@ module.exports = (sequelize, DataTypes) => {
   const Schedule = sequelize.define(
     "Schedule",
     {
+      startDay: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        comment: "여행 시작 날짜",
+      },
+      endDay: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        comment: "여행 끝 날짜",
+      },
       scheduleDay: {
         type: DataTypes.INTEGER,
         allowNull: false,

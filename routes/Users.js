@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs");
 
 const { Users } = require("../models");
 const { Schedule } = require("../models");
+const upload = require("../middleware/upload");
 const { sign } = require("jsonwebtoken");
 const { check, validationResult } = require("express-validator");
 require("dotenv").config();
@@ -345,23 +346,97 @@ router.put("/change-password", async (req, res) => {
   }
 });
 
-// mypage랑 schedule 연결함
-router.get("/mypage-trip-history", async (req, res) => {
-  const mp = await MyPageDBs.findAll();
-  let mpList = [];
+router.put("/change-username", async (req, res) => {
+  const { email, newUsername } = req.body;
 
-  mpList.push({
-    title: mp.titleOfTrip,
-    photo: mp.MyPagePhoto,
-    atThtTime: mp.createdAt,
-  });
+  const user = await Users.findOne({ where: { email } });
 
-  res.json(mpList);
+  // 유저 이메일로 찾는데 유저 이메일이 틀린경우
+  if (user == null) {
+    return res.status(200).json({
+      errors: [
+        {
+          msg: "A Email Is Wrong ",
+        },
+      ],
+    });
+  }
+
+  if (user.email == email) {
+    Users.update({ username: newUsername }, { where: { email } });
+    res.json("success");
+  }
 });
 
-router.post("/trip-schedule", async (req, res) => {
+// mypage랑 schedule 연결함
+// 대표 사진, 제목
+router.post("/mypage-trip-history", upload, async (req, res) => {
+  try {
+    const { thumbnail, tripTitle, description } = req.body;
+
+    testImages.create({
+      thumbnail,
+      scheduleTitle,
+    });
+
+    res.json({
+      msg: "upload",
+      thumbnail,
+      scheduleTitle,
+      createdAt,
+    });
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+});
+
+router.get("/mypage-trip-history", async (req, res) => {
+  try {
+    const mp = await MyPageDBs.findAll({ where: { UserId } });
+    let mpList = [];
+
+    mpList.push({
+      title: mp.titleOfTrip,
+      photo: mp.MyPagePhoto,
+      atThatTime: mp.createdAt,
+    });
+
+    res.json(mpList);
+  } catch (e) {
+    res.status(400).json({ msg: e.message });
+  }
+});
+
+router.post("/trip-schedule", upload, async (req, res) => {
   // 마이페이지랑, 일정생성시 front -> server로 id값을 넘겨주기
   // username으로 user_id얻고, user_id로 관련 데이터 스케쥴 테이블에서 다 찾고 스케줄 id 비교로 데이터 뽑기
+  try {
+    const { startDay, endDay, places } = req.body;
+    let scheduleList = [];
+
+    const schedulePageId = await Schedule.findAll({ where: { page_id } });
+
+    const scheduleTableUser = await Schedule.findAll({
+      where: { userId: userId },
+    });
+    // 시작 날짜 만들어야 하는거 같음
+    if (schedulePageId && scheduleTableUser) {
+      places.map((place) => {
+        scheduleList.push({
+          title: scheduleTableUser.place.title,
+          scheduleDay: scheduleTableUser.place.scheduleDay,
+          order: scheduleTableUser.place,
+          photo: scheduleTableUser.place.placePhoto,
+        });
+      });
+      res.json({ list: scheduleList });
+    }
+  } catch (e) {
+    res.status(400).json({ msg: e.message });
+  }
+});
+
+router.get("/trip-schedule", async (req, res) => {
   const { username, scheduleID } = req.body;
   let scheduleList = [];
 

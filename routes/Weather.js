@@ -6,23 +6,23 @@ const axios = require("axios");
 
 // REDIS
 const Redis = require("redis");
-const redisClient = Redis.createClient(); // ({url: defualt url})
+const client = Redis.createClient(); // ({url: defualt url})
 const DEFAULT_EXPIRATION = 3600; // 3600s = 1hr
 
-redisClient.connect();
+client.connect();
 
-redisClient.on("connect", () => {
+client.on("connect", () => {
   console.log("connect");
 });
 
-redisClient.on("error", (err) => {
+client.on("error", (err) => {
   console.error(err);
 });
 
 /*
 const cache = (req, res, next) => {
   const key = req.body;
-  redisClient.get(key, (err, data) => {
+  client.get(key, (err, data) => {
     if (err) throw err;
     if (data !== null) {
       console.log("Cache Hits");
@@ -41,7 +41,7 @@ router.post("/", (req, res) => {
   console.log("key: ", key);
   try {
     console.log("redis before");
-    redisClient.get(key, async (err, dataRes) => {
+    client.get(key, async (err, dataRes) => {
       console.log("redis start");
       if (err) {
         console.log("redis err");
@@ -71,11 +71,7 @@ router.post("/", (req, res) => {
             },
           }
         );
-        redisClient.SETEX(
-          key,
-          DEFAULT_EXPIRATION,
-          JSON.stringify(dataRes.data)
-        );
+        client.SETEX(key, DEFAULT_EXPIRATION, JSON.stringify(dataRes.data));
         res.status(200).send({
           dataRes: dataRes.data,
           msg: "cache miss",

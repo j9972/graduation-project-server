@@ -43,9 +43,6 @@ module.exports = (sequelize, DataTypes) => {
     Users.hasMany(models.MyPageDBs, {
       onDelete: "cascade",
     });
-  };
-
-  Users.associate = (models) => {
     Users.hasMany(models.Schedule, {
       onDelete: "cascade",
     });

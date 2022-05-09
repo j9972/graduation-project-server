@@ -2,15 +2,25 @@ module.exports = (sequelize, DataTypes) => {
   const MyPageDBs = sequelize.define(
     "MyPageDBs",
     {
-      titleOfTrip: {
+      area: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        comment: "지역",
+      },
+      tripTitle: {
         type: DataTypes.STRING,
         allowNull: false,
         comment: "여행 제목",
       },
-      MyPagePhoto: {
+      thumbnail: {
         type: DataTypes.BLOB("long"),
         allowNull: false,
         comment: "일정 대표 사진",
+      },
+      description: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        comment: "설명",
       },
     },
     {
