@@ -411,7 +411,7 @@ router.post("/trip-schedule", upload, async (req, res) => {
   // 마이페이지랑, 일정생성시 front -> server로 id값을 넘겨주기
   // username으로 user_id얻고, user_id로 관련 데이터 스케쥴 테이블에서 다 찾고 스케줄 id 비교로 데이터 뽑기
   try {
-    const { startDay, endDay, places } = req.body;
+    const { area, startDay, endDay, tripTitle, description, days } = req.body;
     let scheduleList = [];
 
     const schedulePageId = await Schedule.findAll({ where: { page_id } });
@@ -421,14 +421,21 @@ router.post("/trip-schedule", upload, async (req, res) => {
     });
     // 시작 날짜 만들어야 하는거 같음
     if (schedulePageId && scheduleTableUser) {
-      places.map((place) => {
-        scheduleList.push({
-          title: scheduleTableUser.place.title,
-          scheduleDay: scheduleTableUser.place.scheduleDay,
-          order: scheduleTableUser.place,
-          photo: scheduleTableUser.place.placePhoto,
-        });
+      scheduleList.push({
+        area,
+        startDay,
+        endDay,
+        tripTitle,
+        description,
       });
+      // places.map((place) => {
+      //   scheduleList.push({
+      //     title: scheduleTableUser.place.title,
+      //     scheduleDay: scheduleTableUser.place.scheduleDay,
+      //     order: scheduleTableUser.place,
+      //     photo: scheduleTableUser.place.placePhoto,
+      //   });
+      // });
       res.json({ list: scheduleList });
     }
   } catch (e) {

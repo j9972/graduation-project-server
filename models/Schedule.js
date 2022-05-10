@@ -18,16 +18,16 @@ module.exports = (sequelize, DataTypes) => {
         comment: "여행 설명",
       },
       startDay: {
-        type: DataTypes.DATE,
+        type: DataTypes.DATEONLY,
         allowNull: false,
         comment: "여행 시작 날짜",
       },
       endDay: {
-        type: DataTypes.DATE,
+        type: DataTypes.DATEONLY,
         allowNull: false,
         comment: "여행 끝 날짜",
       },
-      days: {
+      day: {
         type: DataTypes.INTEGER,
         allowNull: false,
         comment: "여행 순서 - 날짜별",
