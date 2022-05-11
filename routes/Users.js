@@ -409,21 +409,12 @@ router.post("/mypage-trip-history", upload, async (req, res) => {
   }
 });
 
-router.get("/mypage-trip-history", async (req, res) => {
+// userId를 params에 넣어서 그 유저만 볼 수 있게끔 함
+router.get("/mypage-trip-history/:id", async (req, res) => {
   try {
-    const mp = await MyPageDBs.findAll();
-    //const user = await Users.findOne({ where: { UserId } });
-    //const user = await MyPageDBs.findAll({ where: { UserId: req.user.id } });
-
-    //console.log("mp:", mp);
-    //console.log("user:", user);
-    let mpList = [];
-
-    // mpList.push({
-    //   title: mp.titleOfTrip,
-    //   photo: mp.MyPagePhoto,
-    //   atThatTime: mp.createdAt,
-    // });
+    // id는 그냥 로그인 했을떄 나오는 userId쓰기
+    const id = req.params.id;
+    const mp = await MyPageDBs.findAll({ where: { UserId: id } });
 
     res.json(mp);
   } catch (e) {
