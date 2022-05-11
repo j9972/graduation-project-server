@@ -402,7 +402,7 @@ router.post("/mypage-trip-history", upload, async (req, res) => {
       description,
       startDay,
       endDay,
-      userId: user.id,
+      UserId: user.id,
     });
   } catch (e) {
     res.status(400).json({ message: e.message });
@@ -431,8 +431,11 @@ router.post("/trip-schedule", upload, async (req, res) => {
 
     // user의 id를 page id를 받아야 함.
     const user = await Users.findOne({ where: { username } });
+    console.log("user: ", user);
+    const page = await MyPageDBs.findAll({ where: { UserId: user.id } });
+    console.log("page", page);
 
-    // const schedulePageId = await Schedule.findAll({ where: { page_id } });
+    // userId를 기반으로 pageId값을 받아와서 해당 pageId를 갖은 애들만 봉줘야함
 
     days.map((item) => {
       item.places.map((place, index) => {
@@ -442,6 +445,7 @@ router.post("/trip-schedule", upload, async (req, res) => {
           placeTitle: place.name,
           placeImage: place.img,
           UserId: user.id,
+          page_id: page.id,
         });
       });
     });
@@ -454,6 +458,7 @@ router.post("/trip-schedule", upload, async (req, res) => {
           placeTitle: place.name,
           placeImage: place.img,
           UserId: user.id,
+          page_id: page.id,
         });
       });
     });
