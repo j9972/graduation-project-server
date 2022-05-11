@@ -74,6 +74,7 @@ router.post("/search", async (req, res) => {
       //Promise.all 안에 Promise<> 배열을 넣으면 동기처리를 함 ( itemsInfo )
       await Promise.all(
         items.map(async (item) => {
+          console.log("item: ", item);
           const response = await axios.get(
             "https://openapi.naver.com/v1/search/image.json",
             {

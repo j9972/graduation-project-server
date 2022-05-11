@@ -1,17 +1,17 @@
+require("dotenv").config();
+
 const express = require("express");
 const router = express.Router();
 
 const bcrypt = require("bcryptjs");
+const { sign } = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
+const { check, validationResult } = require("express-validator");
 
 const { Users } = require("../models");
 const { Schedule } = require("../models");
-const upload = require("../middleware/upload");
-const { sign } = require("jsonwebtoken");
-const { check, validationResult } = require("express-validator");
-require("dotenv").config();
-
-const nodemailer = require("nodemailer");
 const MyPageDBs = require("../models/MyPageDBs");
+const upload = require("../middleware/upload");
 
 //Router -> username을 id로 생각
 router.post("/", [check("email").isEmail()], async (req, res) => {
@@ -411,33 +411,66 @@ router.post("/trip-schedule", upload, async (req, res) => {
   // 마이페이지랑, 일정생성시 front -> server로 id값을 넘겨주기
   // username으로 user_id얻고, user_id로 관련 데이터 스케쥴 테이블에서 다 찾고 스케줄 id 비교로 데이터 뽑기
   try {
-    const { area, startDay, endDay, tripTitle, description, days } = req.body;
+    const { username, area, startDay, endDay, tripTitle, description, days } =
+      req.body;
     let scheduleList = [];
 
-    const schedulePageId = await Schedule.findAll({ where: { page_id } });
+    const user = await Users.findOne({ where: { username } });
+    const userId = user.id;
+    console.log("user: ", userId);
+    // const schedulePageId = await Schedule.findAll({ where: { page_id } });
 
+    // 특정 user가 가지고 있는 모든 여행 기록을 가지고 와서 pageid로 구분해서 보여줌
     const scheduleTableUser = await Schedule.findAll({
       where: { userId: userId },
     });
-    // 시작 날짜 만들어야 하는거 같음
-    if (schedulePageId && scheduleTableUser) {
-      scheduleList.push({
+
+    // if (schedulePageId && scheduleTableUser) {
+    scheduleList.push({
+      area,
+      startDay,
+      endDay,
+      tripTitle,
+      description,
+      days,
+    });
+
+    for (let i = 0; i < days.length; i++) {
+      console.log("days: ", days[i].day);
+    }
+
+    // 한번에 여러 데이터 삽입하는 방법
+    scheduleList.map((item) => {
+      //item.map((itemIdx) => {
+      Schedule.create({
         area,
         startDay,
         endDay,
         tripTitle,
         description,
+
+        day: days[1].day, //item.days[0].day
+        order: 1,
+        placeTitle: "gym",
+        placeImage:
+          "http://tong.visitkorea.or.kr/cms/resource/08/2650208_image2_1.jpg",
+        // order: item.itemIdx,
+        // placeTitle: item.itemIdx.img,
+        // placeImage: item.itemIdx.name,
+        //});
       });
-      // places.map((place) => {
-      //   scheduleList.push({
-      //     title: scheduleTableUser.place.title,
-      //     scheduleDay: scheduleTableUser.place.scheduleDay,
-      //     order: scheduleTableUser.place,
-      //     photo: scheduleTableUser.place.placePhoto,
-      //   });
-      // });
-      res.json({ list: scheduleList });
-    }
+      console.log("item: ", item.days[0].day);
+      //item:  [ { day: 1, places: [ [Object], [Object] ] } ]
+    });
+    // places.map((place) => {
+    //   scheduleList.push({
+    //     title: scheduleTableUser.place.title,
+    //     scheduleDay: scheduleTableUser.place.scheduleDay,
+    //     order: scheduleTableUser.place,
+    //     photo: scheduleTableUser.place.placePhoto,
+    //   });
+    // });
+    res.json({ list: scheduleList, msg: "success" });
   } catch (e) {
     res.status(400).json({ msg: e.message });
   }
