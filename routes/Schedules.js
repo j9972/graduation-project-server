@@ -22,6 +22,7 @@ router.post("/upload", upload, async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const images = await testImages.findAll();
+    console.log("images:", images);
     res.send({ msg: "success", images });
   } catch (e) {
     res.status(400).json({ message: e.message });

@@ -2,31 +2,6 @@ module.exports = (sequelize, DataTypes) => {
   const Schedule = sequelize.define(
     "Schedule",
     {
-      area: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        comment: "여행 지역",
-      },
-      tripTitle: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        comment: "여행 제목",
-      },
-      description: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        comment: "여행 설명",
-      },
-      startDay: {
-        type: DataTypes.DATEONLY,
-        allowNull: false,
-        comment: "여행 시작 날짜",
-      },
-      endDay: {
-        type: DataTypes.DATEONLY,
-        allowNull: false,
-        comment: "여행 끝 날짜",
-      },
       day: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -43,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
         comment: "장소 이름",
       },
       placeImage: {
-        type: DataTypes.BLOB("long"),
+        type: DataTypes.STRING,
         allowNull: false,
         comment: "장소 사진",
       },

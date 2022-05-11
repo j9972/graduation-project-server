@@ -10,7 +10,7 @@ const { check, validationResult } = require("express-validator");
 
 const { Users } = require("../models");
 const { Schedule } = require("../models");
-const MyPageDBs = require("../models/MyPageDBs");
+const { MyPageDBs } = require("../models");
 const upload = require("../middleware/upload");
 
 //Router -> username을 id로 생각
@@ -372,18 +372,37 @@ router.put("/change-username", async (req, res) => {
 // 대표 사진, 제목
 router.post("/mypage-trip-history", upload, async (req, res) => {
   try {
-    const { thumbnail, tripTitle, description } = req.body;
-
-    testImages.create({
+    const {
+      username,
+      area,
       thumbnail,
-      scheduleTitle,
+      tripTitle,
+      description,
+      startDay,
+      endDay,
+    } = req.body;
+
+    const user = await Users.findOne({ where: { username } });
+
+    MyPageDBs.create({
+      area,
+      thumbnail,
+      tripTitle,
+      description,
+      startDay,
+      endDay,
+      UserId: user.id,
     });
-
+    // 생성 날짜는 front에서 생성된 데이터에서 가져오면 될거같음
     res.json({
-      msg: "upload",
+      msg: "upload success",
+      area,
       thumbnail,
-      scheduleTitle,
-      createdAt,
+      tripTitle,
+      description,
+      startDay,
+      endDay,
+      userId: user.id,
     });
   } catch (e) {
     res.status(400).json({ message: e.message });
@@ -392,16 +411,21 @@ router.post("/mypage-trip-history", upload, async (req, res) => {
 
 router.get("/mypage-trip-history", async (req, res) => {
   try {
-    const mp = await MyPageDBs.findAll({ where: { UserId } });
+    const mp = await MyPageDBs.findAll();
+    //const user = await Users.findOne({ where: { UserId } });
+    //const user = await MyPageDBs.findAll({ where: { UserId: req.user.id } });
+
+    //console.log("mp:", mp);
+    //console.log("user:", user);
     let mpList = [];
 
-    mpList.push({
-      title: mp.titleOfTrip,
-      photo: mp.MyPagePhoto,
-      atThatTime: mp.createdAt,
-    });
+    // mpList.push({
+    //   title: mp.titleOfTrip,
+    //   photo: mp.MyPagePhoto,
+    //   atThatTime: mp.createdAt,
+    // });
 
-    res.json(mpList);
+    res.json(mp);
   } catch (e) {
     res.status(400).json({ msg: e.message });
   }
@@ -435,33 +459,70 @@ router.post("/trip-schedule", upload, async (req, res) => {
       days,
     });
 
-    for (let i = 0; i < days.length; i++) {
-      console.log("days: ", days[i].day);
-    }
-
-    // 한번에 여러 데이터 삽입하는 방법
-    scheduleList.map((item) => {
-      //item.map((itemIdx) => {
-      Schedule.create({
-        area,
-        startDay,
-        endDay,
-        tripTitle,
-        description,
-
-        day: days[1].day, //item.days[0].day
-        order: 1,
-        placeTitle: "gym",
-        placeImage:
-          "http://tong.visitkorea.or.kr/cms/resource/08/2650208_image2_1.jpg",
-        // order: item.itemIdx,
-        // placeTitle: item.itemIdx.img,
-        // placeImage: item.itemIdx.name,
-        //});
-      });
-      console.log("item: ", item.days[0].day);
-      //item:  [ { day: 1, places: [ [Object], [Object] ] } ]
+    //Schedule.bulkCreate(area, startDay, endDay, tripTitle, description, days);
+    const daysData = days.map((item) => {
+      return {
+        day: item.day,
+        places: item.places,
+      };
     });
+
+    /*
+    console.log("days:", days);
+    console.log("days.places", days.places);
+    const test = [];
+    for (let i = 0; i < days.places.length; i++) {
+      test.push(days.places[i]);
+    }
+    console.log("test:", test);
+    // const placesData = places.map((item) => {
+    //   return {
+    //     name: item.name,
+    //     img: item.img,
+    //   };
+    // });
+    */
+    console.log("daysData: ", daysData);
+    console.log("places: ", daysData.places);
+    for (let i = 0; i < days.length; i++) {
+      Schedule.create({});
+    }
+    // console.log("placesData: ", placesData);
+    // Schedule.create({
+    //   area,
+    //   startDay,
+    //   endDay,
+    //   tripTitle,
+    //   description,
+    //   day: daysData.days,
+    //   placeTitle: daysData.places.name,
+    //   placePhoto: daysData.places.img,
+    //   order: 1,
+    // });
+
+    // 한번에 여러 데이터 삽입하는 방법 -> bulkCreate 이거 써야할거같음
+    // scheduleList.map((item) => {
+    //   //item.map((itemIdx) => {
+    //   Schedule.create({
+    //     area,
+    //     startDay,
+    //     endDay,
+    //     tripTitle,
+    //     description,
+
+    //     day: days[1].day, //item.days[0].day
+    //     order: 1,
+    //     placeTitle: "gym",
+    //     placeImage:
+    //       "http://tong.visitkorea.or.kr/cms/resource/08/2650208_image2_1.jpg",
+    //     // order: item.itemIdx,
+    //     // placeTitle: item.itemIdx.img,
+    //     // placeImage: item.itemIdx.name,
+    //     //});
+    //   });
+    //   console.log("item: ", item.days[0].day);
+    //   //item:  [ { day: 1, places: [ [Object], [Object] ] } ]
+    // });
     // places.map((place) => {
     //   scheduleList.push({
     //     title: scheduleTableUser.place.title,
@@ -498,13 +559,6 @@ router.get("/trip-schedule", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
-  const id = req.params.id;
-  console.log(id);
-  const user = await Users.findByPk(id, {
-    attributes: { exclude: ["password"] },
-  });
-  res.json(user);
-});
+router.get("/:id", async (req, res) => {});
 
 module.exports = router;
