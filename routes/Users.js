@@ -426,130 +426,56 @@ router.post("/trip-schedule", upload, async (req, res) => {
   // 마이페이지랑, 일정생성시 front -> server로 id값을 넘겨주기
   // username으로 user_id얻고, user_id로 관련 데이터 스케쥴 테이블에서 다 찾고 스케줄 id 비교로 데이터 뽑기
   try {
-    const { username, area, startDay, endDay, tripTitle, description, days } =
-      req.body;
-    let scheduleList = [];
+    const { username, days } = req.body;
+    let itemList = [];
 
+    // user의 id를 page id를 받아야 함.
     const user = await Users.findOne({ where: { username } });
-    const userId = user.id;
-    console.log("user: ", userId);
+
     // const schedulePageId = await Schedule.findAll({ where: { page_id } });
 
-    // 특정 user가 가지고 있는 모든 여행 기록을 가지고 와서 pageid로 구분해서 보여줌
-    const scheduleTableUser = await Schedule.findAll({
-      where: { userId: userId },
+    days.map((item) => {
+      item.places.map((place, index) => {
+        Schedule.create({
+          day: item.day,
+          order: index,
+          placeTitle: place.name,
+          placeImage: place.img,
+          UserId: user.id,
+        });
+      });
     });
 
-    // if (schedulePageId && scheduleTableUser) {
-    scheduleList.push({
-      area,
-      startDay,
-      endDay,
-      tripTitle,
-      description,
-      days,
+    days.map((item) => {
+      item.places.map((place, index) => {
+        itemList.push({
+          day: item.day,
+          order: index,
+          placeTitle: place.name,
+          placeImage: place.img,
+          UserId: user.id,
+        });
+      });
     });
 
-    //Schedule.bulkCreate(area, startDay, endDay, tripTitle, description, days);
-    const daysData = days.map((item) => {
-      return {
-        day: item.day,
-        places: item.places,
-      };
+    res.json({
+      itemList,
+      msg: "success",
     });
-
-    /*
-    console.log("days:", days);
-    console.log("days.places", days.places);
-    const test = [];
-    for (let i = 0; i < days.places.length; i++) {
-      test.push(days.places[i]);
-    }
-    console.log("test:", test);
-    // const placesData = places.map((item) => {
-    //   return {
-    //     name: item.name,
-    //     img: item.img,
-    //   };
-    // });
-    */
-    console.log("daysData: ", daysData);
-    console.log("places: ", daysData.places);
-    for (let i = 0; i < days.length; i++) {
-      Schedule.create({});
-    }
-    // console.log("placesData: ", placesData);
-    // Schedule.create({
-    //   area,
-    //   startDay,
-    //   endDay,
-    //   tripTitle,
-    //   description,
-    //   day: daysData.days,
-    //   placeTitle: daysData.places.name,
-    //   placePhoto: daysData.places.img,
-    //   order: 1,
-    // });
-
-    // 한번에 여러 데이터 삽입하는 방법 -> bulkCreate 이거 써야할거같음
-    // scheduleList.map((item) => {
-    //   //item.map((itemIdx) => {
-    //   Schedule.create({
-    //     area,
-    //     startDay,
-    //     endDay,
-    //     tripTitle,
-    //     description,
-
-    //     day: days[1].day, //item.days[0].day
-    //     order: 1,
-    //     placeTitle: "gym",
-    //     placeImage:
-    //       "http://tong.visitkorea.or.kr/cms/resource/08/2650208_image2_1.jpg",
-    //     // order: item.itemIdx,
-    //     // placeTitle: item.itemIdx.img,
-    //     // placeImage: item.itemIdx.name,
-    //     //});
-    //   });
-    //   console.log("item: ", item.days[0].day);
-    //   //item:  [ { day: 1, places: [ [Object], [Object] ] } ]
-    // });
-    // places.map((place) => {
-    //   scheduleList.push({
-    //     title: scheduleTableUser.place.title,
-    //     scheduleDay: scheduleTableUser.place.scheduleDay,
-    //     order: scheduleTableUser.place,
-    //     photo: scheduleTableUser.place.placePhoto,
-    //   });
-    // });
-    res.json({ list: scheduleList, msg: "success" });
   } catch (e) {
     res.status(400).json({ msg: e.message });
   }
 });
 
-router.get("/trip-schedule", async (req, res) => {
-  const { username, scheduleID } = req.body;
-  let scheduleList = [];
+router.get("/trip-schedule", async (req, res) => {});
 
-  const user = await Users.findOne({ where: { username } });
-  const userId = user.id;
-
-  const scheduleTableUser = await Schedule.findAll({
-    where: { userId: userId },
+router.get("/:id", async (req, res) => {
+  const id = req.params.id;
+  console.log(id);
+  const user = await Users.findByPk(id, {
+    attributes: { exclude: ["password"] },
   });
-
-  if (scheduleTableUser.id == scheduleID) {
-    scheduleList.push({
-      title: user.title,
-      scheduleDay: user.scheduleDay,
-      order: user.order,
-      photo: user.placePhoto,
-    });
-    res.json({ list: scheduleList });
-  }
+  res.json(user);
 });
-
-router.get("/:id", async (req, res) => {});
 
 module.exports = router;
