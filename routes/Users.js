@@ -64,7 +64,7 @@ router.post("/", [check("email").isEmail()], async (req, res) => {
     { email: Users.email, username: Users.username, id: Users.id },
     process.env.ACCESS_TOKEN_SECRET,
     {
-      expiresIn: "1m",
+      expiresIn: "10m",
     }
   );
 
@@ -213,7 +213,7 @@ router.post("/login", async (req, res) => {
         { username: user.username, id: user.id },
         process.env.ACCESS_TOKEN_SECRET,
         {
-          expiresIn: "1m",
+          expiresIn: "10m",
         }
       );
 
@@ -221,7 +221,7 @@ router.post("/login", async (req, res) => {
         { username: user.username, id: user.id },
         process.env.REFRESH_TOKEN_SECRET,
         {
-          expiresIn: "1m",
+          expiresIn: "24d",
         }
       );
 
@@ -260,7 +260,7 @@ router.post("/token", async (req, res) => {
 
   // If token is not provided, send error message  (refresh 토큰이 없으니 재로근이 요함)
   if (!refreshToken) {
-    res.status(401).json({
+    return res.status(401).json({
       errors: [
         {
           msg: "refreshToken not found. Do Login",
@@ -278,12 +278,12 @@ router.post("/token", async (req, res) => {
 
   // If token does not exist, send error message
   if (!user) {
-    res.json({ error: "user Account doesnt exist" });
+    return res.json({ error: "user Account doesnt exist" });
   }
 
   // token 유효성 검사 -> 유효하지 않음
   if (!user.refreshTokens) {
-    res.status(403).json({
+    return res.status(403).json({
       errors: [
         {
           msg: "Invalid refresh token. Do Login",
@@ -296,7 +296,7 @@ router.post("/token", async (req, res) => {
   try {
     bcrypt.compare(password, user.password).then((match) => {
       if (!match) {
-        res.send({ error: "wrong password or username" });
+        return res.send({ error: "wrong password or username" });
       }
       const user = sign(refreshToken, process.env.REFRESH_TOKEN_SECRET);
       // user = { email: 'jame@gmail.com', iat: 1633586290, exp: 1633586350 }
@@ -306,14 +306,14 @@ router.post("/token", async (req, res) => {
         { username: { username } },
         process.env.ACCESS_TOKEN_SECRET,
         {
-          expiresIn: "1m",
+          expiresIn: "10m",
         }
       );
       // 어떤 refresh를 통해 받은 access인지 확인 가능
       res.json({ accessToken, refreshToken });
     });
   } catch (error) {
-    res.status(403).json({
+    return res.status(403).json({
       errors: [
         {
           msg: "Invalid token",
