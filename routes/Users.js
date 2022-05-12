@@ -64,7 +64,7 @@ router.post("/", [check("email").isEmail()], async (req, res) => {
     { email: Users.email, username: Users.username, id: Users.id },
     process.env.ACCESS_TOKEN_SECRET,
     {
-      expiresIn: "10m",
+      expiresIn: "1m",
     }
   );
 
@@ -213,7 +213,7 @@ router.post("/login", async (req, res) => {
         { username: user.username, id: user.id },
         process.env.ACCESS_TOKEN_SECRET,
         {
-          expiresIn: "10m",
+          expiresIn: "1m",
         }
       );
 
@@ -221,7 +221,7 @@ router.post("/login", async (req, res) => {
         { username: user.username, id: user.id },
         process.env.REFRESH_TOKEN_SECRET,
         {
-          expiresIn: "24d",
+          expiresIn: "1m",
         }
       );
 
@@ -251,18 +251,19 @@ router.post("/login", async (req, res) => {
 // Create new access token from refresh token
 // token 정리 => 회원가입시 access 줌 => 로그인시 access & refresh , refresh 없으면 로그인통해줌, access 없으면 token 포인트에서줌
 router.post("/token", async (req, res) => {
+  // 여기가 refresh가 맞는가 체크
   const refreshToken = req.header("x-auth-token");
   const { username, password } = req.body;
   console.log("refreshToken:", refreshToken);
   //const { id } = req.body;
   //const id = req.params.id;
 
-  // If token is not provided, send error message
+  // If token is not provided, send error message  (refresh 토큰이 없으니 재로근이 요함)
   if (!refreshToken) {
     res.status(401).json({
       errors: [
         {
-          msg: "refreshToken not found",
+          msg: "refreshToken not found. Do Login",
         },
       ],
     });
@@ -275,18 +276,17 @@ router.post("/token", async (req, res) => {
     },
   });
 
-  //res.json(manager.refreshTokens);
-
   // If token does not exist, send error message
   if (!user) {
     res.json({ error: "user Account doesnt exist" });
   }
 
+  // token 유효성 검사 -> 유효하지 않음
   if (!user.refreshTokens) {
     res.status(403).json({
       errors: [
         {
-          msg: "Invalid refresh token",
+          msg: "Invalid refresh token. Do Login",
         },
       ],
     });
@@ -306,7 +306,7 @@ router.post("/token", async (req, res) => {
         { username: { username } },
         process.env.ACCESS_TOKEN_SECRET,
         {
-          expiresIn: "10m",
+          expiresIn: "1m",
         }
       );
       // 어떤 refresh를 통해 받은 access인지 확인 가능
@@ -472,8 +472,6 @@ router.post("/trip-schedule", upload, async (req, res) => {
     res.status(400).json({ msg: e.message });
   }
 });
-
-router.get("/trip-schedule", async (req, res) => {});
 
 router.get("/:id", async (req, res) => {
   const id = req.params.id;
