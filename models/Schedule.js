@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       placeImage: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         comment: "장소 사진",
       },
     },

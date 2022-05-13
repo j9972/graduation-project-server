@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
       thumbnail: {
         type: DataTypes.STRING,
         //type: DataTypes.BLOB("long"),
-        allowNull: false,
+        allowNull: true,
         comment: "일정 대표 사진",
       },
     },
