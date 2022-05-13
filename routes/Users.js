@@ -60,6 +60,7 @@ router.post("/", [check("email").isEmail()], async (req, res) => {
     });
   });
 
+  // ACCESSTOKEN을 주는 이유는,,,?
   const accessToken = sign(
     { email: Users.email, username: Users.username, id: Users.id },
     process.env.ACCESS_TOKEN_SECRET,
@@ -433,8 +434,8 @@ router.post("/trip-schedule", upload, async (req, res) => {
     // user의 id를 page id를 받아야 함.
     const user = await Users.findOne({ where: { username } });
     console.log("user: ", user);
-    const page = await MyPageDBs.findAll({ where: { UserId: user.id } });
-    console.log("page", page);
+    const page = await MyPageDBs.findOne({ where: { UserId: user.id } });
+    console.log("page: ", page.area);
 
     // userId를 기반으로 pageId값을 받아와서 해당 pageId를 갖은 애들만 봉줘야함
 

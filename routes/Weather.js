@@ -11,14 +11,6 @@ const DEFAULT_EXPIRATION = 3600; // 3600s = 1hr
 
 client.connect();
 
-client.on("connect", () => {
-  console.log("connect");
-});
-
-client.on("error", (err) => {
-  console.error(err);
-});
-
 /*
 const cache = (req, res, next) => {
   const key = req.body;
