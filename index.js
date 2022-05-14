@@ -12,15 +12,15 @@ const Redis = require("redis");
 const redisClient = Redis.createClient(); // ({url: defualt url})
 const DEFAULT_EXPIRATION = 3600; // 3600s = 1hr
 
-redisClient.connect();
+// redisClient.connect();
 
-redisClient.on("connect", () => {
-  console.log("connect");
-});
+// redisClient.on("connect", () => {
+//   console.log("connect");
+// });
 
-redisClient.on("error", (err) => {
-  console.error(err);
-});
+// redisClient.on("error", (err) => {
+//   console.error(err);
+// });
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
