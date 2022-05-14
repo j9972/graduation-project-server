@@ -412,11 +412,25 @@ router.post("/mypage-trip-history", upload, async (req, res) => {
 });
 
 // userId를 params에 넣어서 그 유저만 볼 수 있게끔 함
-router.get("/mypage-trip-history/:id", async (req, res) => {
+router.get("/mypage-trip-history/:username", async (req, res) => {
+  try {
+    // id는 그냥 로그인 했을떄 나오는 userId쓰기
+    const username = req.params.username;
+    const user = await Users.findOne({ where: { username } });
+    //console.log("user: ", user);
+    const mp = await MyPageDBs.findAll({ where: { UserId: user.id } });
+
+    res.json(mp);
+  } catch (e) {
+    res.status(400).json({ msg: e.message });
+  }
+});
+
+router.get("/trip-schedule/:id", upload, async (req, res) => {
   try {
     // id는 그냥 로그인 했을떄 나오는 userId쓰기
     const id = req.params.id;
-    const mp = await MyPageDBs.findAll({ where: { UserId: id } });
+    const mp = await Schedule.findByPk(id);
 
     res.json(mp);
   } catch (e) {
@@ -435,7 +449,7 @@ router.post("/trip-schedule", upload, async (req, res) => {
     const user = await Users.findOne({ where: { username } });
     console.log("user: ", user);
     const page = await MyPageDBs.findOne({ where: { UserId: user.id } });
-    //console.log("page: ", page.area);
+    console.log("page: ", page.area);
 
     // userId를 기반으로 pageId값을 받아와서 해당 pageId를 갖은 애들만 봉줘야함
 
@@ -447,7 +461,7 @@ router.post("/trip-schedule", upload, async (req, res) => {
           placeTitle: place.name,
           placeImage: place.img,
           UserId: user.id,
-          //page_id: page.id,
+          page_id: page.id,
         });
       });
     });
@@ -460,7 +474,7 @@ router.post("/trip-schedule", upload, async (req, res) => {
           placeTitle: place.name,
           placeImage: place.img,
           UserId: user.id,
-          //page_id: page.id,
+          page_id: page.id,
         });
       });
     });

@@ -9,7 +9,7 @@ const Redis = require("redis");
 const client = Redis.createClient(); // ({url: defualt url})
 const DEFAULT_EXPIRATION = 3600; // 3600s = 1hr
 
-//client.connect();
+client.connect();
 
 /*
 const cache = (req, res, next) => {
@@ -25,7 +25,7 @@ const cache = (req, res, next) => {
     }
   });
 };
-
+*/
 
 // Router -> 지역 선택하는 과정에서 넘어오는 title을 가지고 검색
 router.post("/", (req, res) => {
