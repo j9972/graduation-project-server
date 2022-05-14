@@ -11,7 +11,16 @@ const { check, validationResult } = require("express-validator");
 const { Users } = require("../models");
 const { Schedule } = require("../models");
 const { MyPageDBs } = require("../models");
+const { get } = require("../middleware/cache");
+const { set } = require("../middleware/cache");
 const upload = require("../middleware/upload");
+
+//Redis
+const redis = require("redis");
+const client = redis.createClient();
+const DEFAULT_EXPIRATION = 3600; // 3600s = 1hr
+
+client.connect();
 
 //Router -> username을 id로 생각
 router.post("/", [check("email").isEmail()], async (req, res) => {
@@ -480,10 +489,19 @@ router.post("/trip-schedule", upload, async (req, res) => {
   }
 });
 
-router.get("/basicInfo/:username", async (req, res) => {
+/*
+router.get("/basicInfo/:username", get, async (req, res) => {
   try {
     // id는 그냥 로그인 했을떄 나오는 userId쓰기
-    const username = req.params.username;
+    const { username } = req.params;
+
+    // const cachedUser = await client.get(`basicInfo-${username}`);
+
+    // if (cachedUser) {
+    //   console.log("cache hit");
+    //   return res.json(JSON.parse(cachedUser));
+    // }
+
     const user = await Users.findOne(
       {
         where: {
@@ -496,8 +514,53 @@ router.get("/basicInfo/:username", async (req, res) => {
         },
       }
     );
+    set(
+      `basicInfo-${username}`,
+      JSON.stringify(user),
+      "EX",
+      DEFAULT_EXPIRATION
+    );
 
-    res.json(user);
+    console.log("cache miss");
+    return res.json(user);
+  } catch (e) {
+    res.status(400).json({ msg: e.message });
+  }
+});
+*/
+
+router.get("/basicInfo/:username", async (req, res) => {
+  try {
+    // id는 그냥 로그인 했을떄 나오는 userId쓰기
+    const { username } = req.params;
+
+    const cachedUser = await client.get(`basicInfo-${username}`);
+
+    if (cachedUser) {
+      console.log("cache hit");
+      return res.json(JSON.parse(cachedUser));
+    }
+
+    const user = await Users.findOne(
+      {
+        where: {
+          username,
+        },
+      },
+      {
+        attributes: {
+          exclude: ["password"],
+        },
+      }
+    );
+    client.set(
+      `basicInfo-${username}`,
+      JSON.stringify(user),
+      "EX",
+      DEFAULT_EXPIRATION
+    );
+    console.log("cache miss");
+    return res.json(user);
   } catch (e) {
     res.status(400).json({ msg: e.message });
   }

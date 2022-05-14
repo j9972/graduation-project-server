@@ -7,21 +7,6 @@ const morgan = require("morgan");
 const helmet = require("helmet");
 const compression = require("compression");
 
-// REDIS
-const Redis = require("redis");
-const redisClient = Redis.createClient(); // ({url: defualt url})
-const DEFAULT_EXPIRATION = 3600; // 3600s = 1hr
-
-// redisClient.connect();
-
-// redisClient.on("connect", () => {
-//   console.log("connect");
-// });
-
-// redisClient.on("error", (err) => {
-//   console.error(err);
-// });
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
