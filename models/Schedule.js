@@ -4,17 +4,17 @@ module.exports = (sequelize, DataTypes) => {
     {
       day: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         comment: "여행 순서 - 날짜별",
       },
       order: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         comment: "여행 순서 - 같은 날짜 장소별",
       },
       placeTitle: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         comment: "장소 이름",
       },
       placeImage: {

@@ -480,7 +480,7 @@ router.post("/trip-schedule", upload, async (req, res) => {
   }
 });
 
-router.get("/:username", async (req, res) => {
+router.get("/basicInfo/:username", async (req, res) => {
   try {
     // id는 그냥 로그인 했을떄 나오는 userId쓰기
     const username = req.params.username;
