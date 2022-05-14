@@ -385,13 +385,14 @@ router.get("/mypage-trip-history/:username", async (req, res) => {
   }
 });
 
-router.get("/trip-schedule/:id", upload, async (req, res) => {
+router.get("/trip-schedule/:username", upload, async (req, res) => {
   try {
-    // id는 그냥 로그인 했을떄 나오는 userId쓰기
-    const id = req.params.id;
-    const mp = await Schedule.findByPk(id);
+    const username = req.params.username;
+    const user = await Users.findOne({ where: { username } });
+    //console.log("user: ", user);
+    const tp = await MyPageDBs.findAll({ where: { UserId: user.id } });
 
-    res.json(mp);
+    res.json(tp);
   } catch (e) {
     res.status(400).json({ msg: e.message });
   }
@@ -479,13 +480,27 @@ router.post("/trip-schedule", upload, async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
-  const id = req.params.id;
-  console.log(id);
-  const user = await Users.findByPk(id, {
-    attributes: { exclude: ["password"] },
-  });
-  res.json(user);
+router.get("/:username", async (req, res) => {
+  try {
+    // id는 그냥 로그인 했을떄 나오는 userId쓰기
+    const username = req.params.username;
+    const user = await Users.findOne(
+      {
+        where: {
+          username,
+        },
+      },
+      {
+        attributes: {
+          exclude: ["password"],
+        },
+      }
+    );
+
+    res.json(user);
+  } catch (e) {
+    res.status(400).json({ msg: e.message });
+  }
 });
 
 module.exports = router;
