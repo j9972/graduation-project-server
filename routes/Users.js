@@ -406,11 +406,11 @@ router.post("/trip-schedule", upload, async (req, res) => {
       username,
       days,
       area,
-      thumbnail,
       tripTitle,
+      thumbnail,
       description,
-      startDay,
-      endDay,
+      startDate,
+      endDate,
     } = req.body;
 
     let itemList_schedule = [];
@@ -420,7 +420,6 @@ router.post("/trip-schedule", upload, async (req, res) => {
     const user = await Users.findOne({ where: { username } });
     console.log("user: ", user);
     const page = await MyPageDBs.findOne({ where: { UserId: user.id } });
-    console.log("page: ", page.area);
 
     // userId를 기반으로 pageId값을 받아와서 해당 pageId를 갖은 애들만 봉줘야함
 
@@ -442,8 +441,8 @@ router.post("/trip-schedule", upload, async (req, res) => {
       thumbnail,
       tripTitle,
       description,
-      startDay,
-      endDay,
+      startDay: startDate,
+      endDay: endDate,
       UserId: user.id,
     });
 
@@ -465,8 +464,8 @@ router.post("/trip-schedule", upload, async (req, res) => {
       thumbnail,
       tripTitle,
       description,
-      startDay,
-      endDay,
+      startDay: startDate,
+      endDay: endDate,
       UserId: user.id,
     });
 
