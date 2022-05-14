@@ -370,47 +370,6 @@ router.put("/change-username", async (req, res) => {
   }
 });
 
-// mypage랑 schedule 연결함
-// 대표 사진, 제목
-router.post("/mypage-trip-history", upload, async (req, res) => {
-  try {
-    const {
-      username,
-      area,
-      thumbnail,
-      tripTitle,
-      description,
-      startDay,
-      endDay,
-    } = req.body;
-
-    const user = await Users.findOne({ where: { username } });
-
-    MyPageDBs.create({
-      area,
-      thumbnail,
-      tripTitle,
-      description,
-      startDay,
-      endDay,
-      UserId: user.id,
-    });
-    // 생성 날짜는 front에서 생성된 데이터에서 가져오면 될거같음
-    res.json({
-      msg: "upload success",
-      area,
-      thumbnail,
-      tripTitle,
-      description,
-      startDay,
-      endDay,
-      UserId: user.id,
-    });
-  } catch (e) {
-    res.status(400).json({ message: e.message });
-  }
-});
-
 // userId를 params에 넣어서 그 유저만 볼 수 있게끔 함
 router.get("/mypage-trip-history/:username", async (req, res) => {
   try {
@@ -438,12 +397,24 @@ router.get("/trip-schedule/:id", upload, async (req, res) => {
   }
 });
 
+// 마이페이지랑 스케쥴표 동시 저장
 router.post("/trip-schedule", upload, async (req, res) => {
   // 마이페이지랑, 일정생성시 front -> server로 id값을 넘겨주기
   // username으로 user_id얻고, user_id로 관련 데이터 스케쥴 테이블에서 다 찾고 스케줄 id 비교로 데이터 뽑기
   try {
-    const { username, days } = req.body;
-    let itemList = [];
+    const {
+      username,
+      days,
+      area,
+      thumbnail,
+      tripTitle,
+      description,
+      startDay,
+      endDay,
+    } = req.body;
+
+    let itemList_schedule = [];
+    let itemList_mypage = [];
 
     // user의 id를 page id를 받아야 함.
     const user = await Users.findOne({ where: { username } });
@@ -461,26 +432,47 @@ router.post("/trip-schedule", upload, async (req, res) => {
           placeTitle: place.name,
           placeImage: place.img,
           UserId: user.id,
-          page_id: page.id,
+          //page_id: page.id,
         });
       });
     });
 
+    MyPageDBs.create({
+      area,
+      thumbnail,
+      tripTitle,
+      description,
+      startDay,
+      endDay,
+      UserId: user.id,
+    });
+
     days.map((item) => {
       item.places.map((place, index) => {
-        itemList.push({
+        itemList_schedule.push({
           day: item.day,
           order: index,
           placeTitle: place.name,
           placeImage: place.img,
           UserId: user.id,
-          page_id: page.id,
+          //page_id: page.id,
         });
       });
     });
 
+    itemList_mypage.push({
+      area,
+      thumbnail,
+      tripTitle,
+      description,
+      startDay,
+      endDay,
+      UserId: user.id,
+    });
+
     res.json({
-      itemList,
+      itemList_schedule,
+      itemList_mypage,
       msg: "success",
     });
   } catch (e) {
