@@ -10,6 +10,7 @@ const { check, validationResult } = require("express-validator");
 
 const { Users, Schedule, MyPageDBs } = require("../models");
 const { get, set } = require("../middleware/cache");
+const { validateToken } = require("../middleware/AuthMiddleware");
 const upload = require("../middleware/upload");
 
 //Redis
@@ -261,9 +262,6 @@ router.post("/token", async (req, res) => {
   // 여기가 refresh가 맞는가 체크
   const refreshToken = req.header("x-auth-token");
   const { username, password } = req.body;
-  console.log("refreshToken:", refreshToken);
-  //const { id } = req.body;
-  //const id = req.params.id;
 
   // If token is not provided, send error message  (refresh 토큰이 없으니 재로근이 요함)
   if (!refreshToken) {
@@ -330,7 +328,7 @@ router.post("/token", async (req, res) => {
   }
 });
 
-router.put("/change-password", async (req, res) => {
+router.put("/change-password", validateToken, async (req, res) => {
   const { email, newPassword } = req.body;
 
   const user = await Users.findOne({ where: { email } });
@@ -354,7 +352,7 @@ router.put("/change-password", async (req, res) => {
   }
 });
 
-router.put("/change-username", async (req, res) => {
+router.put("/change-username", validateToken, async (req, res) => {
   const { email, newUsername } = req.body;
 
   const user = await Users.findOne({ where: { email } });
@@ -378,21 +376,25 @@ router.put("/change-username", async (req, res) => {
 
 // 개인이 소유한 기록물들 보여주기
 // 이렇게하면 id 만 받아오니까 전부 보여줌
-router.get("/mypage-trip-history/:username", async (req, res) => {
-  try {
-    // id는 그냥 로그인 했을떄 나오는 userId쓰기
-    const { username } = req.params;
+router.get(
+  "/mypage-trip-history/:username",
+  validateToken,
+  async (req, res) => {
+    try {
+      // id는 그냥 로그인 했을떄 나오는 userId쓰기
+      const { username } = req.params;
 
-    const user = await Users.findOne({ where: { username } });
-    const mp = await MyPageDBs.findAll({ where: { UserId: user.id } });
+      const user = await Users.findOne({ where: { username } });
+      const mp = await MyPageDBs.findAll({ where: { UserId: user.id } });
 
-    res.json(mp);
-  } catch (e) {
-    res.status(400).json({ msg: e.message });
+      res.json(mp);
+    } catch (e) {
+      res.status(400).json({ msg: e.message });
+    }
   }
-});
+);
 
-router.get("/trip-schedule/:username/:id", upload, async (req, res) => {
+router.get("/trip-schedule/:username/:id", validateToken, async (req, res) => {
   try {
     const { username, id } = req.params;
 
@@ -411,7 +413,7 @@ router.get("/trip-schedule/:username/:id", upload, async (req, res) => {
 });
 
 // 마이페이지랑 스케쥴표 동시 저장
-router.post("/trip-schedule", upload, async (req, res) => {
+router.post("/trip-schedule", validateToken, async (req, res) => {
   // 마이페이지랑, 일정생성시 front -> server로 id값을 넘겨주기
   // username으로 user_id얻고, user_id로 관련 데이터 스케쥴 테이블에서 다 찾고 스케줄 id 비교로 데이터 뽑기
   try {

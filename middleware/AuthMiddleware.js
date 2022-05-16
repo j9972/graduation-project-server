@@ -5,10 +5,10 @@ const validateToken = (req, res, next) => {
   const accessToken = req.header("x-auth-token");
 
   if (!accessToken) {
-    res.status(401).json({
+    res.status(400).json({
       errors: [
         {
-          msg: "user not logged in",
+          msg: "Expires over, get AccessToken by refreshToken",
         },
       ],
     });
