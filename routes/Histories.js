@@ -6,6 +6,13 @@ const router = express.Router();
 const { Users, Schedule, MyPageDBs } = require("../models");
 const { validateToken } = require("../middleware/AuthMiddleware");
 
+//Redis
+const redis = require("redis");
+const client = redis.createClient();
+const DEFAULT_EXPIRATION = 3600; // 3600s = 1hr
+
+client.connect();
+
 // 개인이 소유한 기록물들 보여주기
 // 이렇게하면 id 만 받아오니까 전부 보여줌
 router.get(
@@ -16,10 +23,24 @@ router.get(
       // id는 그냥 로그인 했을떄 나오는 userId쓰기
       const { username } = req.params;
 
+      const cachedUser = await client.get(`mypage-trip-history-${username}`);
+
+      if (cachedUser) {
+        console.log("cache hit");
+        return res.json(JSON.parse(cachedUser));
+      }
+
       const user = await Users.findOne({ where: { username } });
       const mp = await MyPageDBs.findAll({ where: { UserId: user.id } });
 
-      res.json(mp);
+      client.set(
+        `mypage-trip-history-${username}`,
+        JSON.stringify(mp),
+        "EX",
+        DEFAULT_EXPIRATION
+      );
+      console.log("cache miss");
+      return res.json(mp);
     } catch (e) {
       res.status(400).json({ msg: e.message });
     }
@@ -30,6 +51,13 @@ router.get("/trip-schedule/:username/:id", validateToken, async (req, res) => {
   try {
     const { username, id } = req.params;
 
+    const cachedUser = await client.get(`trip-schedule-${username}`);
+
+    if (cachedUser) {
+      console.log("cache hit");
+      return res.json(JSON.parse(cachedUser));
+    }
+
     const user = await Users.findOne({ where: { username } });
     const tp = await Schedule.findAll({
       where: {
@@ -38,7 +66,14 @@ router.get("/trip-schedule/:username/:id", validateToken, async (req, res) => {
       },
     });
 
-    res.json(tp);
+    client.set(
+      `trip-schedule-${username}`,
+      JSON.stringify(tp),
+      "EX",
+      DEFAULT_EXPIRATION
+    );
+    console.log("cache miss");
+    return res.json(tp);
   } catch (e) {
     res.status(400).json({ msg: e.message });
   }

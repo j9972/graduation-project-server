@@ -5,13 +5,30 @@ const axios = require("axios");
 // ENV
 require("dotenv").config();
 
+// REDIS
+const redis = require("redis");
+const client = redis.createClient(); // ({url: defualt url})
+const DEFAULT_EXPIRATION = 3600; // 3600s = 1hr
+
+client.connect();
+
 // Router -> 행사 / 공연 / 축제 part
 
 // 키워드 검색 조회 -> contentId 가져옴
 router.post("/search-keyword", async (req, res) => {
-  const keyword = req.body.keyword;
-  console.log(keyword);
   try {
+    const keyword = req.body.keyword;
+    console.log(keyword);
+
+    // check data which we want
+    let cacheData = await client.get(`searchKeyword:${keyword}`);
+
+    // cache hit
+    if (cacheData) {
+      console.log("cache hit");
+      return res.json(JSON.parse(cacheData));
+    }
+
     const response = await axios.get(
       "http://api.visitkorea.or.kr/openapi/service/rest/KorService/searchKeyword",
       {
@@ -35,7 +52,16 @@ router.post("/search-keyword", async (req, res) => {
     );
     if (response.status === 200) {
       const items = response.data;
-      res.json(items);
+
+      client.set(
+        `searchKeyword:${keyword}`,
+        JSON.stringify(items),
+        "EX",
+        DEFAULT_EXPIRATION
+      );
+
+      console.log("cache miss");
+      return res.json(items);
     }
   } catch (e) {
     console.error(e);
@@ -45,9 +71,19 @@ router.post("/search-keyword", async (req, res) => {
 
 // 소개 정보 조회, contentTypeId = 15 => 여행코스 타입, contentId는 keyword로 부터
 router.post("/detailIntro", async (req, res) => {
-  const contentId = req.body.contentId;
-  console.log(contentId);
   try {
+    const contentId = req.body.contentId;
+    console.log(contentId);
+
+    // check data which we want
+    let cacheData = await client.get(`detailIntro:${contentId}`);
+
+    // cache hit
+    if (cacheData) {
+      console.log("cache hit");
+      return res.json(JSON.parse(cacheData));
+    }
+
     const response = await axios.get(
       "http://api.visitkorea.or.kr/openapi/service/rest/KorService/detailIntro",
       {
@@ -69,7 +105,16 @@ router.post("/detailIntro", async (req, res) => {
     );
     if (response.status === 200) {
       const placeInfo = response.data.response.body.items.item;
-      res.json(placeInfo);
+
+      client.set(
+        `detailIntro:${contentId}`,
+        JSON.stringify(placeInfo),
+        "EX",
+        DEFAULT_EXPIRATION
+      );
+
+      console.log("cache miss");
+      return res.json(placeInfo);
     }
   } catch (e) {
     console.error(e);
@@ -79,11 +124,21 @@ router.post("/detailIntro", async (req, res) => {
 
 // 행사 정보 조회, 소개 정보 조회에서 이벤트 시작날짜 알아오기 ( 이거 할 필요 없음 )
 router.post("/search-Festival", async (req, res) => {
-  const eventStartDate = req.body.eventStartDate;
-  const contentId = req.body.contentId;
-  console.log("contentId: ", contentId);
-  console.log("eventStartDate:", eventStartDate);
   try {
+    const eventStartDate = req.body.eventStartDate;
+    const contentId = req.body.contentId;
+    console.log("contentId: ", contentId);
+    console.log("eventStartDate:", eventStartDate);
+
+    // check data which we want
+    let cacheData = await client.get(`searchFestival:${contentId}`);
+
+    // cache hit
+    if (cacheData) {
+      console.log("cache hit");
+      return res.json(JSON.parse(cacheData));
+    }
+
     const response = await axios.get(
       "http://api.visitkorea.or.kr/openapi/service/rest/KorService/searchFestival",
       {
@@ -106,7 +161,16 @@ router.post("/search-Festival", async (req, res) => {
     );
     if (response.status === 200) {
       const items = response.data;
-      res.json(items);
+
+      client.set(
+        `searchFestival:${contentId}`,
+        JSON.stringify(items),
+        "EX",
+        DEFAULT_EXPIRATION
+      );
+
+      console.log("cache miss");
+      return res.json(items);
     }
   } catch (e) {
     console.error(e);
