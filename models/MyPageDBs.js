@@ -2,6 +2,12 @@ module.exports = (sequelize, DataTypes) => {
   const MyPageDBs = sequelize.define(
     "MyPageDBs",
     {
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        allowNull: false,
+        primaryKey: true,
+      },
       area: {
         type: DataTypes.STRING,
         allowNull: false,

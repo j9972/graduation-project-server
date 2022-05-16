@@ -377,6 +377,7 @@ router.put("/change-username", async (req, res) => {
 });
 
 // 개인이 소유한 기록물들 보여주기
+// 이렇게하면 id 만 받아오니까 전부 보여줌
 router.get("/mypage-trip-history/:username", async (req, res) => {
   try {
     // id는 그냥 로그인 했을떄 나오는 userId쓰기
