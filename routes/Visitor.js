@@ -40,10 +40,8 @@ router.get("/", async (req, res) => {
     }
 
     if (Ip) {
-      console.log("check1");
       if (Ip.ip === ip) {
         if (Ip.date === dateTime) {
-          console.log("check2");
           return res.status(200).json({
             checkMsg: [
               {
@@ -52,7 +50,6 @@ router.get("/", async (req, res) => {
             ],
           });
         } else {
-          console.log("check3");
           Visitor.update(
             {
               totalCount: Ip.totalCount + 1,
@@ -67,7 +64,6 @@ router.get("/", async (req, res) => {
           );
         }
       } else {
-        console.log("check4");
         Visitor.create({
           ip,
           totalCount: Ip.totalCount + 1,

@@ -9,7 +9,7 @@ const client = Redis.createClient(); // ({url: defualt url})
 const DEFAULT_EXPIRATION = 3600; // 3600s = 1hr
 
 // connect redis server with client ( client is closed 에러 prevent )
-//client.connect();
+client.connect();
 
 // ENV
 require("dotenv").config();
@@ -23,10 +23,20 @@ proj4.defs(
 
 // Router
 router.post("/search", async (req, res) => {
-  const search = req.body.search;
-  console.log("search:", search);
-
   try {
+    const search = req.body.search;
+    console.log("search:", search);
+
+    // check data which we want
+    let cacheData = await client.get(`local.json:${search}`);
+
+    // cache hit
+    if (cacheData) {
+      console.log("cache hit");
+      return res.json(JSON.parse(cacheData));
+    }
+
+    // cache miss
     const dataResponse = await axios.get(
       "https://openapi.naver.com/v1/search/local.json",
       {
@@ -55,6 +65,7 @@ router.post("/search", async (req, res) => {
         // <b> 없애줌
         // 참고로 replace 메서드는 첫번재 파라미터가 리터럴일 경우 일치하는 첫번째 부분만 변경하기 때문에 전부 찾을 수 있도록 정규표현식으로 g를 포함
       });
+
       //Promise.all 안에 Promise<> 배열을 넣으면 동기처리를 함 ( itemsInfo )
       await Promise.all(
         items.map(async (item) => {
@@ -102,7 +113,15 @@ router.post("/search", async (req, res) => {
           }
         })
       );
-      res.json(itemsInfo);
+
+      client.set(
+        `local.json:${search}`,
+        JSON.stringify(itemsInfo),
+        "EX",
+        DEFAULT_EXPIRATION
+      );
+      console.log("cache miss");
+      return res.json(itemsInfo);
     }
   } catch (e) {
     console.error(e);
