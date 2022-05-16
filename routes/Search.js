@@ -1,18 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const axios = require("axios");
-const uuidAPIKey = require("uuid-apikey");
 const proj4 = require("proj4");
 
 // REDIS
 const Redis = require("redis");
-const redisClient = Redis.createClient(); // ({url: defualt url})
+const client = Redis.createClient(); // ({url: defualt url})
 const DEFAULT_EXPIRATION = 3600; // 3600s = 1hr
 
 // connect redis server with client ( client is closed 에러 prevent )
-//redisClient.connect();
-
-// console.log(uuidAPIKey.create()); -> 시스템마다 다른 api키를 제공하면 이값들을 디비에서 관리하면 된다 -> isAPIKey method or check method로 확인가능
+//client.connect();
 
 // ENV
 require("dotenv").config();
@@ -23,19 +20,6 @@ proj4.defs(
   "TM128",
   "+proj=tmerc +lat_0=38 +lon_0=128 +k=0.9999 +x_0=400000 +y_0=600000 +ellps=bessel +units=m +no_defs +towgs84=-115.80,474.99,674.11,1.16,-2.31,-1.63,6.43"
 );
-
-// Redis middleware
-const getOrSetCache = (key, cb) => {
-  return new Promise((resolve, reject) => {
-    redisClient.get(key, async (error, data) => {
-      if (error) return reject(error);
-      if (data != null) return resolve(JSON.parse(data)); // hit
-      const freshData = await cb();
-      redisClient.SETEX(key, DEFAULT_EXPIRATION, JSON.stringify(freshData));
-      resolve(freshData);
-    });
-  });
-};
 
 // Router
 router.post("/search", async (req, res) => {

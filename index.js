@@ -36,6 +36,18 @@ app.use("/recommend-sport", recommendSportRouter);
 const userRouter = require("./routes/Users");
 app.use("/users", userRouter);
 
+// 유저 Id,Password
+const infoRouter = require("./routes/UserInfos");
+app.use("/users", infoRouter);
+
+// Trip - History
+const historyRouter = require("./routes/Histories");
+app.use("/users", historyRouter);
+
+// email - Auth
+const emailRouter = require("./routes/emailAuths");
+app.use("/users", emailRouter);
+
 // schedule
 const scheduleRouter = require("./routes/Schedules");
 app.use("/schedule", scheduleRouter);
