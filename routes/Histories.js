@@ -60,22 +60,10 @@ router.post("/trip-schedule", validateToken, async (req, res) => {
       endDate,
     } = req.body;
 
-    let itemList_mypage = [];
-
     // user의 id를 page id를 받아야 함.
     const user = await Users.findOne({ where: { username } });
 
-    await MyPageDBs.create({
-      area,
-      thumbnail,
-      tripTitle,
-      description,
-      startDay: startDate,
-      endDay: endDate,
-      UserId: user.id,
-    });
-
-    await itemList_mypage.push({
+    const itemList_mypage = await MyPageDBs.create({
       area,
       thumbnail,
       tripTitle,

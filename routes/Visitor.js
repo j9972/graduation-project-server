@@ -81,8 +81,9 @@ router.get("/", async (req, res) => {
       msg: "success",
       dateTime,
     });
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    console.error(e);
+    res.status(400).json({ msg: e.message });
   }
 });
 

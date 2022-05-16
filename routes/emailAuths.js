@@ -15,6 +15,7 @@ router.post("/email-auth", async (req, res) => {
 
   const SecurityCode = generateRandom(111111, 999999);
   console.log("SecurityCode:", SecurityCode);
+
   // 노드 메일 보내는 email
   let transporter = nodemailer.createTransport({
     service: "Gmail",
@@ -34,6 +35,7 @@ router.post("/email-auth", async (req, res) => {
     text: "오른쪽 숫자 6자리를 입력해주세요" + SecurityCode,
   });
   console.log("mailOptions:", mailOptions);
+
   // 메일이 보내진 후의 콜백 함수
   transporter.sendMail(mailOptions, (err) => {
     if (err) res.send(err);

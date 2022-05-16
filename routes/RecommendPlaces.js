@@ -73,7 +73,7 @@ router.post("/detailIntro", async (req, res) => {
     }
   } catch (e) {
     console.error(e);
-    res.json({ msg: e });
+    res.status(400).json({ msg: e.message });
   }
 });
 
@@ -110,12 +110,8 @@ router.post("/search-Festival", async (req, res) => {
     }
   } catch (e) {
     console.error(e);
-    res.json({ msg: e });
+    res.status(400).json({ msg: e.message });
   }
-});
-
-router.get("/", (req, res) => {
-  res.json("recommendPlaces");
 });
 
 module.exports = router;

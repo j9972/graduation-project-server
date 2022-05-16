@@ -77,8 +77,4 @@ router.post("/detailIntro", async (req, res) => {
   }
 });
 
-router.get("/", (req, res) => {
-  res.json("recommendSports");
-});
-
 module.exports = router;

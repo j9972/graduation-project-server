@@ -5,10 +5,9 @@ const router = express.Router();
 
 const bcrypt = require("bcryptjs");
 const { sign } = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
 const { check, validationResult } = require("express-validator");
 
-const { Users, Schedule, MyPageDBs } = require("../models");
+const { Users } = require("../models");
 
 //Redis
 const redis = require("redis");

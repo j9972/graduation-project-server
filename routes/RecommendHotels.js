@@ -34,7 +34,7 @@ router.post("/search-keyword", async (req, res) => {
     }
   } catch (e) {
     console.error(e);
-    res.json({ msg: e });
+    res.status(400).json({ msg: e.message });
   }
 });
 
@@ -68,7 +68,7 @@ router.post("/detailIntro", async (req, res) => {
     }
   } catch (e) {
     console.error(e);
-    res.json({ msg: e });
+    res.status(400).json({ msg: e.message });
   }
 });
 
@@ -101,7 +101,7 @@ router.post("/search-stay", async (req, res) => {
     }
   } catch (e) {
     console.error(e);
-    res.json({ msg: e });
+    res.status(400).json({ msg: e.message });
   }
 });
 
