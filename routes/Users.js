@@ -215,7 +215,7 @@ router.post("/token", async (req, res) => {
     return res.status(403).json({
       errors: [
         {
-          msg: "Invalid token",
+          msg: "Invalid token do Login",
         },
       ],
     });
