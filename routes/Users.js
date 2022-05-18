@@ -160,7 +160,7 @@ router.post("/login", async (req, res) => {
 router.post("/token", async (req, res) => {
   // 여기가 refresh가 맞는가 체크
   const refreshToken = req.header("x-auth-token");
-  const { username, password } = req.body;
+  const { username } = req.body;
 
   // If token is not provided, send error message  (refresh 토큰이 없으니 재로근이 요함)
   if (!refreshToken) {
@@ -198,24 +198,19 @@ router.post("/token", async (req, res) => {
 
   // 이 부분이 access를 refresh 기반으로 재발급 하는 부분임
   try {
-    bcrypt.compare(password, user.password).then((match) => {
-      if (!match) {
-        return res.send({ error: "wrong password or username" });
+    const user = sign(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    // user = { email: 'jame@gmail.com', iat: 1633586290, exp: 1633586350 }
+    const { username } = user;
+    // 및의 함수가 accesToken의 유효성 검사 하는 부분
+    const accessToken = sign(
+      { username: { username } },
+      process.env.ACCESS_TOKEN_SECRET,
+      {
+        expiresIn: "10m",
       }
-      const user = sign(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-      // user = { email: 'jame@gmail.com', iat: 1633586290, exp: 1633586350 }
-      const { username } = user;
-      // 및의 함수가 accesToken의 유효성 검사 하는 부분
-      const accessToken = sign(
-        { username: { username } },
-        process.env.ACCESS_TOKEN_SECRET,
-        {
-          expiresIn: "10m",
-        }
-      );
-      // 어떤 refresh를 통해 받은 access인지 확인 가능
-      res.json({ accessToken, refreshToken });
-    });
+    );
+    // 어떤 refresh를 통해 받은 access인지 확인 가능
+    res.json({ accessToken, refreshToken });
   } catch (error) {
     return res.status(403).json({
       errors: [
