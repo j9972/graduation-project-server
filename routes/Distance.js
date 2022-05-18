@@ -14,23 +14,26 @@ client.connect();
 
 // Router -> 출발지와 도착지 ( 마커 하나하나 거리 )를 차로 이동거리와 이동시간 표시
 router.post("/", async (req, res) => {
+  // 시작점과 도착지의 경도 위도를 받아와야함
+  let { start, goal } = req.body;
+
+  let startLocation = start.join();
+  let goalLocation = goal.join();
+
   try {
-    // 시작점과 도착지의 경도 위도를 받아와야함
-    let { start, goal } = req.body;
-
-    let startLocation = start.join();
-    let goalLocation = goal.join();
-
     // check data which we want
-    let cacheData = await client.get(`driving:${start}${goal}`);
+    let cacheData = await client.get(`driving:${startLocation}`);
 
     // cache hit
     if (cacheData) {
       console.log("cache hit");
-      return res.json(JSON.parse(cacheData));
+      return res.json({
+        distance: JSON.parse(cacheData).distance,
+        time: JSON.parse(cacheData).duration,
+      });
     }
 
-    const response = axios.get(
+    const response = await axios.get(
       "https://naveropenapi.apigw.ntruss.com/map-direction/v1/driving",
       {
         params: {
@@ -46,17 +49,22 @@ router.post("/", async (req, res) => {
         },
       }
     );
+
     if (response.status === 200) {
       const compareItem = response.data.route.trafast[0].summary;
       // distance(거리) -> m로 표현, time(이동시간)->millisecond로 표현
 
       client.set(
-        `driving:${start}${goal}`,
-        JSON.stringify(compareItem),
+        `driving:${startLocation}`,
+        JSON.stringify({
+          distance: compareItem.distance,
+          duration: compareItem.duration,
+        }),
         "EX",
         DEFAULT_EXPIRATION
       );
       console.log("cache miss");
+
       return res.json({
         distance: compareItem.distance,
         time: compareItem.duration,
