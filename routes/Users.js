@@ -68,7 +68,7 @@ router.post("/", [check("email").isEmail()], async (req, res) => {
     { email: Users.email, username: Users.username, id: Users.id },
     process.env.ACCESS_TOKEN_SECRET,
     {
-      expiresIn: "10m",
+      expiresIn: "7m",
     }
   );
 
@@ -120,7 +120,7 @@ router.post("/login", async (req, res) => {
         { username: user.username, id: user.id },
         process.env.ACCESS_TOKEN_SECRET,
         {
-          expiresIn: "10m",
+          expiresIn: "7m",
         }
       );
 
@@ -128,7 +128,7 @@ router.post("/login", async (req, res) => {
         { username: user.username, id: user.id },
         process.env.REFRESH_TOKEN_SECRET,
         {
-          expiresIn: "24d",
+          expiresIn: "30d",
         }
       );
 
@@ -206,7 +206,7 @@ router.post("/token", async (req, res) => {
       { username: { username } },
       process.env.ACCESS_TOKEN_SECRET,
       {
-        expiresIn: "10m",
+        expiresIn: "7m",
       }
     );
     // 어떤 refresh를 통해 받은 access인지 확인 가능
