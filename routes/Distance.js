@@ -6,6 +6,12 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 
+const redis = require("redis");
+const client = redis.createClient();
+const DEFAULT_EXPIRATION = 3600; // 3600s = 1hr
+
+client.connect();
+
 // Router -> 출발지와 도착지 ( 마커 하나하나 거리 )를 차로 이동거리와 이동시간 표시
 router.post("/", (req, res) => {
   // 시작점과 도착지의 경도 위도를 받아와야함

@@ -2,6 +2,13 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 
+//Redis
+const redis = require("redis");
+const client = redis.createClient();
+const DEFAULT_EXPIRATION = 3600; // 3600s = 1hr
+
+client.connect();
+
 // ENV
 require("dotenv").config();
 
