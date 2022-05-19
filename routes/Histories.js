@@ -6,41 +6,21 @@ const router = express.Router();
 const { Users, Schedule, MyPageDBs } = require("../models");
 const { validateToken } = require("../middleware/AuthMiddleware");
 
-//Redis
-const redis = require("redis");
-const client = redis.createClient();
-const DEFAULT_EXPIRATION = 3600; // 3600s = 1hr
-
-client.connect();
-
 // 개인이 소유한 기록물들 보여주기
 // 이렇게하면 id 만 받아오니까 전부 보여줌
+
 router.get(
   "/mypage-trip-history/:username",
   validateToken,
   async (req, res) => {
     try {
-      // id는 그냥 로그인 했을떄 나오는 userId쓰기
       const { username } = req.params;
 
-      const cachedUser = await client.get(`mypage-trip-history-${username}`);
-
-      if (cachedUser) {
-        console.log("cache hit");
-        return res.json(JSON.parse(cachedUser));
-      }
-
       const user = await Users.findOne({ where: { username } });
+
       const mp = await MyPageDBs.findAll({ where: { UserId: user.id } });
 
-      client.set(
-        `mypage-trip-history-${username}`,
-        JSON.stringify(mp),
-        "EX",
-        DEFAULT_EXPIRATION
-      );
-      console.log("cache miss");
-      return res.json(mp);
+      res.json(mp);
     } catch (e) {
       res.status(400).json({ msg: e.message });
     }
@@ -51,13 +31,6 @@ router.get("/trip-schedule/:username/:id", validateToken, async (req, res) => {
   try {
     const { username, id } = req.params;
 
-    const cachedUser = await client.get(`trip-schedule-${username}`);
-
-    if (cachedUser) {
-      console.log("cache hit");
-      return res.json(JSON.parse(cachedUser));
-    }
-
     const user = await Users.findOne({ where: { username } });
     const tp = await Schedule.findAll({
       where: {
@@ -66,14 +39,7 @@ router.get("/trip-schedule/:username/:id", validateToken, async (req, res) => {
       },
     });
 
-    client.set(
-      `trip-schedule-${username}`,
-      JSON.stringify(tp),
-      "EX",
-      DEFAULT_EXPIRATION
-    );
-    console.log("cache miss");
-    return res.json(tp);
+    res.json(tp);
   } catch (e) {
     res.status(400).json({ msg: e.message });
   }
@@ -107,11 +73,8 @@ router.post("/trip-schedule", validateToken, async (req, res) => {
       endDay: endDate,
       UserId: user.id,
     });
-
-    const page = await MyPageDBs.findOne({ where: { UserId: user.id } });
-
-    // userId를 기반으로 pageId값을 받아와서 해당 pageId를 갖은 애들만 봉줘야함
-    // 더블 클릭해야지 됨........
+    console.log("itemList_mypage: ", itemList_mypage.id);
+    //const page = await MyPageDBs.findOne({ where: { UserId: user.id } });
 
     const itemList_schedule = await Promise.all(
       days.map(async (item) => {
@@ -123,7 +86,7 @@ router.post("/trip-schedule", validateToken, async (req, res) => {
               placeTitle: place.name,
               placeImage: place.img,
               UserId: user.id,
-              page_id: page.id,
+              page_id: itemList_mypage.id,
             });
           })
         );

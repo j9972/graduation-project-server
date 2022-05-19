@@ -20,8 +20,6 @@ router.post("/search-keyword", async (req, res) => {
     const { keyword } = req.body;
     const contenttypeid = 15;
 
-    console.log(keyword, contenttypeid);
-
     // check data which we want
     let cacheData = await client.get(
       `searchKeyword:${keyword}${contenttypeid}`
