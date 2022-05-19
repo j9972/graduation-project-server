@@ -17,11 +17,15 @@ client.connect();
 // 키워드 검색 조회 -> contentId 가져옴
 router.post("/search-keyword", async (req, res) => {
   try {
-    const keyword = req.body.keyword;
-    console.log(keyword);
+    const { keyword } = req.body;
+    const contenttypeid = 15;
+
+    console.log(keyword, contenttypeid);
 
     // check data which we want
-    let cacheData = await client.get(`searchKeyword:${keyword}`);
+    let cacheData = await client.get(
+      `searchKeyword:${keyword}${contenttypeid}`
+    );
 
     // cache hit
     if (cacheData) {
@@ -39,7 +43,7 @@ router.post("/search-keyword", async (req, res) => {
           listYN: "Y",
           _type: "json",
           keyword: keyword,
-          contentTypeId: 15,
+          contentTypeId: contenttypeid,
           numOfRows: 100,
         },
       },
@@ -54,7 +58,7 @@ router.post("/search-keyword", async (req, res) => {
       const items = response.data;
 
       client.set(
-        `searchKeyword:${keyword}`,
+        `searchKeyword:${keyword}${contenttypeid}`,
         JSON.stringify(items),
         "EX",
         DEFAULT_EXPIRATION
