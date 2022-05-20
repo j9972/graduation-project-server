@@ -17,11 +17,14 @@ require("dotenv").config();
 // 키워드 검색 조회
 router.post("/search-keyword", async (req, res) => {
   try {
-    const keyword = req.body.keyword;
+    const { keyword } = req.body;
+    const contenttypeid = 28;
     console.log(keyword);
 
     // check data which we want
-    let cacheData = await client.get(`searchKeyword:${keyword}`);
+    let cacheData = await client.get(
+      `searchKeyword:${keyword}${contenttypeid}`
+    );
 
     // cache hit
     if (cacheData) {
@@ -39,7 +42,7 @@ router.post("/search-keyword", async (req, res) => {
           listYN: "Y",
           _type: "json",
           keyword: keyword,
-          contentTypeId: 28,
+          contentTypeId: contenttypeid,
           numOfRows: 100,
         },
       },
@@ -54,7 +57,7 @@ router.post("/search-keyword", async (req, res) => {
       const sportInfo = response.data.response.body.items.item;
 
       client.set(
-        `searchKeyword:${keyword}`,
+        `searchKeyword:${keyword}${contenttypeid}`,
         JSON.stringify(sportInfo),
         "EX",
         DEFAULT_EXPIRATION
