@@ -104,4 +104,33 @@ router.post("/trip-schedule", validateToken, async (req, res) => {
   }
 });
 
+router.delete(
+  "/mypage-trip-history/:username/:id",
+  validateToken,
+  async (req, res) => {
+    try {
+      const { username, id } = req.params;
+
+      const user = await Users.findOne({ where: { username } });
+      await Schedule.destroy({
+        where: {
+          page_id: id,
+          UserId: user.id,
+        },
+      });
+
+      await MyPageDBs.destroy({
+        where: {
+          id,
+          UserId: user.id,
+        },
+      });
+
+      res.json("DELETE SUCCESS");
+    } catch (e) {
+      res.status(400).json({ msg: e.message });
+    }
+  }
+);
+
 module.exports = router;
