@@ -6,7 +6,6 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 
 const { Users } = require("../models");
-const { validateToken } = require("../middleware/AuthMiddleware");
 
 router.post("/findId", async (req, res) => {
   const email = req.body.email;
@@ -65,7 +64,7 @@ router.post("/findPassword", async (req, res) => {
   }
 });
 
-router.put("/change-password", validateToken, async (req, res) => {
+router.put("/change-password", async (req, res) => {
   const { email, newPassword } = req.body;
 
   const user = await Users.findOne({ where: { email } });
@@ -89,7 +88,7 @@ router.put("/change-password", validateToken, async (req, res) => {
   }
 });
 
-router.put("/change-username", validateToken, async (req, res) => {
+router.put("/change-username", async (req, res) => {
   const { email, newUsername } = req.body;
 
   const user = await Users.findOne({ where: { email } });
