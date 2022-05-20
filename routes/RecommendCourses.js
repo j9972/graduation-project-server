@@ -72,17 +72,8 @@ router.post("/search-keyword", async (req, res) => {
 // 반복 정보 조회, contentTypeId = 25 => 여행코스 타입, contentId는 keyword로 부터
 router.post("/detailInfo", async (req, res) => {
   try {
-    const contentId = req.body.contentId;
+    const { contentId } = req.body;
     console.log(contentId);
-
-    // check data which we want
-    let cacheData = await client.get(`detailIntro:${contentId}`);
-
-    // cache hit
-    if (cacheData) {
-      console.log("cache hit");
-      return res.json(JSON.parse(cacheData));
-    }
 
     const response = await axios.get(
       "http://api.visitkorea.or.kr/openapi/service/rest/KorService/detailInfo",
@@ -105,15 +96,7 @@ router.post("/detailInfo", async (req, res) => {
     );
     if (response.status === 200) {
       const items = response.data;
-      client.set(
-        `detailIntro:${contentId}`,
-        JSON.stringify(items),
-        "EX",
-        DEFAULT_EXPIRATION
-      );
-
-      console.log("cache miss");
-      return res.json(items);
+      res.json(items);
     }
   } catch (e) {
     console.error(e);
