@@ -6,6 +6,7 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 
 const { Users } = require("../models");
+const { validateToken } = require("../middleware/AuthMiddleware");
 
 router.post("/findId", async (req, res) => {
   const email = req.body.email;
@@ -107,6 +108,23 @@ router.put("/change-username", async (req, res) => {
   if (user.email == email) {
     Users.update({ username: newUsername }, { where: { email } });
     res.json("success");
+  }
+});
+
+router.delete("/remove-user/:username", validateToken, async (req, res) => {
+  try {
+    const { username } = req.params;
+    console.log("username", username);
+
+    await Users.destroy({
+      where: {
+        username,
+      },
+    });
+
+    res.json("DELETE SUCCESS");
+  } catch (e) {
+    res.status(400).json({ msg: e.message });
   }
 });
 
