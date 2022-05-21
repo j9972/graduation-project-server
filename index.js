@@ -68,6 +68,10 @@ app.use("/compare-distance", compareDistanceRouter);
 const visitRouter = require("./routes/Visitor");
 app.use("/visitor", visitRouter);
 
+app.get("/", (req, res) => {
+  res.json({ msg: "test" });
+});
+
 // This should be the last route else any after it won't work
 app.use("*", (req, res) => {
   res.status(404).json({
