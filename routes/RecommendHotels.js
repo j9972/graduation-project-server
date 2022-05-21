@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 
+// ENV
+require("dotenv").config();
+
 // REDIS
 const redis = require("redis");
 const client = redis.createClient(); // ({url: defualt url})
