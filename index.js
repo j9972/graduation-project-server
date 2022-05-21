@@ -7,6 +7,8 @@ const morgan = require("morgan");
 const helmet = require("helmet");
 const compression = require("compression");
 
+require("dotenv").config();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
