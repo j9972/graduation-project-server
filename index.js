@@ -71,7 +71,7 @@ const visitRouter = require("./routes/Visitor");
 app.use("/visitor", visitRouter);
 
 app.get("/", (req, res) => {
-  res.json({ msg: "test" });
+  res.json({ msg: "This is Our Server URL" });
 });
 
 // This should be the last route else any after it won't work
