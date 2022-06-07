@@ -86,6 +86,7 @@ app.use("*", (req, res) => {
   });
 });
 
+//app.listen
 db.sequelize
   .sync()
   .then(() => {
